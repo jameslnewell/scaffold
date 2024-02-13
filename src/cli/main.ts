@@ -12,9 +12,19 @@ interface ScaffoldArguments {
 async function main() {
   await yargs(hideBin(process.argv))
     .strict()
-    .scriptName('module')
+    .scriptName('scaffold')
     .hide('help')
     .hide('version')
+    .fail((message, error, parser) => {
+      parser.showHelp()
+      console.log('')
+      if (message) {
+        console.log(`💥 ${message}`)
+      } else {
+        console.log(`💥 ${error?.message}`)
+      }
+      process.exit(1)
+    })
     .command<ScaffoldArguments>({
       command: '$0 <module>',
       builder: yargs => yargs
@@ -37,25 +47,25 @@ async function main() {
         const {prompts, factory} = await loadScaffoldFromModule(argv.module)
 
         // extract options from user
-        let options: {} = {}
-        const parser = yargs(argv._.map(String))
+        const {_, $0, ...options} = yargs(argv._.map(String))
           .strict()
           .hide('help')
           .hide('version')
-          .fail(false)
+          .fail((message, error, parser) => {
+            console.log('')
+            console.log(`scaffold: ${argv.module}`)
+            console.log('')
+            parser.showHelp()
+            console.log('')
+            if (message) {
+              console.log(`💥 ${message}`)
+            } else {
+              console.log(`💥 ${error?.message}`)
+            }
+            process.exit(1)
+          })
           .options(convertPromptsToYargsOptions(prompts))
-        try {
-          const {_, $0, ...otherOptions} = parser.parseSync()
-          options = otherOptions
-        } catch (error) {
-          console.log('')
-          console.log(`scaffold: ${argv.module}`)
-          console.log('')
-          parser.showHelp()
-          console.log('')
-          console.log(`💥 ${error?.message}`)
-          return
-        }  
+          .parseSync()
         console.log('Options:', options)
 
         // create the scaffold fn
