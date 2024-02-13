@@ -1,0 +1,11 @@
+{
+  "$schema": "https://json.schemastore.org/swcrc",
+  "jsc": {
+    "loose": true,
+    "parser": { "syntax": "typescript" }
+  },
+  "sourceMaps": true,
+  "inlineSourcesContent": false,
+  "module": { "type": "es6" },
+  "env": { "targets": { "node": "18" } }
+}
