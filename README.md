@@ -3,27 +3,27 @@
 ## Usage
 Use `npm x` to install and run the _latest_ version of the `scaffold` CLI.
 
-Install and run a scaffold published on NPM:
+Installing and running a scaffold published on NPM:
 ```console
 npm x \
   -p @jameslnewell/scaffold \
   -p some-scaffold-package \
   scaffold \
-    some-scaffold/some-scaffold-module \
+    some-scaffold-package/some-scaffold-module \
     --apply \
     -- \
-    --foo=bar
+    --some=option
 ```
 
-Run a scaffold located on your local machine:
+Running a scaffold located on your local machine:
 ```console
 npm x \
   -p @jameslnewell/scaffold \
   scaffold \
     --apply \
-    /path/to/some-scaffold/some-scaffold-module \
+    ./path/to/some-scaffold/some-scaffold-module.js \
     -- \
-    --foo=bar
+    --some=option
 ```
 
 ## Authoring a scaffold
@@ -31,17 +31,17 @@ npm x \
 A scaffold is just a function which modifies a set of files.
 
 ```ts
-import {Factory, Prompts, Options} from '@jameslnewell/scaffold'
+import {ScaffoldFactory, ScaffoldPrompts, ScaffoldOptions} from '@jameslnewell/scaffold'
 
-export const options = {
+export const prompts = {
   name: {
     type: 'string',
     description: 'The name of the person or animal to greet'
   }
-} satisfies Prompts
+} satisfies ScaffoldPrompts
 
-export const scaffold: Factory<Options<typeof options>> = ({name}) => {
-  return (files, tasks) => {
+export const factory: ScaffoldFactory<ScaffoldOptions<typeof prompts>> = ({name}) => {
+  return ({files, tasks}) => {
     files.write('greeting.txt', `Hello ${name}!`)
   }
 }

@@ -5,27 +5,47 @@
   "type": "module",
   "bin": "dist/cli",
   "main": "dist/lib",
+  "files": [
+    "dist"
+  ],
   "dependencies": {
+    "ejs": "^3.1.10",
+    "picomatch": "^4.0.2"
   },
   "devDependencies": {
-    "@swc/cli": "^0.3.9",
-    "@swc/core": "^1.4.1",
+    "@swc/cli": "^0.3.10",
+    "@swc/core": "^1.4.8",
     "@swc/jest": "^0.2.36",
+    "@types/ejs": "^3.1.5",
     "@types/jest": "^29.0.3",
     "@types/node": "^20.11.1",
+    "@types/picomatch": "^2.3.3",
     "chokidar": "^3.6.0",
-    "jest": "^29.0.3"
+    "jest": "^29.0.3",
+    "typescript": "^5.4.5"
   },
   "jest": {
+    "testMatch": [
+      "<rootDir>/src/**/*.test.ts"
+    ],
     "transform": {
       "^.+\\.(t|j)sx?$": [
         "@swc/jest"
       ]
+    },
+    "extensionsToTreatAsEsm": [
+      ".ts"
+    ],
+    "moduleNameMapper": {
+      "^(\\.{1,2}/.*)\\.js$": "$1"
     }
   },
   "scripts": {
-    "build": "swc src -d dist",
-    "build:watch": "npm run build -- --watch",
+    "check:typing": "tsc",
+    "build": "swc ./src --strip-leading-paths --out-dir ./dist",
+    "chmod": "chmod +x ./dist/cli/main.js",
+    "develop": "npm run build -- --watch",
+    "example:greeting": "./dist/cli/main.js ./dist/example/greeting.js -- --name Bob",
     "test": "jest"
   },
   "license": "MIT"

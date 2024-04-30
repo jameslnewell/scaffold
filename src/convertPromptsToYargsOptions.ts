@@ -1,10 +1,10 @@
 import * as yargs from 'yargs'
-import { Prompts, Options } from '../lib/core/types.js'
+import { ScaffoldPrompts, ScaffoldOptions } from './types.js'
 
 /**
  * Convert prompts to yargs options
  */
-export function convertPromptsToYargsOptions(prompts: Prompts): { [key: string]: Options } {
+export function convertPromptsToYargsOptions(prompts: ScaffoldPrompts): { [key: string]: yargs.Options } {
   const options: { [key: string]: yargs.Options } = {}
 
   for (const [name, {type, array, optional, description}] of Object.entries(prompts)) {

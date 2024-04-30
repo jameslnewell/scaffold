@@ -1,10 +1,14 @@
+#!/usr/bin/env node
 import yargs from 'yargs';
 import { hideBin } from "yargs/helpers";
-import { ApplyFiles, ArrayTasks } from '../lib/index.js';
-import { convertPromptsToYargsOptions } from './convertPromptsToYargsOptions.js';
+import { printDiff } from './printDiff.js';
+import { printOptions } from './printOptions.js';
 import { loadScaffoldFromModule } from './loadScaffoldFromModule.js';
+import { extractOptionsFromYargsArgv } from './extractOptionsFromYargsArgv.js';
+import { createVirtualFiles } from './createVirtualFiles.js';
+import { createTasks } from './createTasks.js';
 
-interface ScaffoldArguments {
+interface ScaffoldCommandArgv {
   module: string
   apply?: boolean
 }
@@ -25,7 +29,7 @@ async function main() {
       }
       process.exit(1)
     })
-    .command<ScaffoldArguments>({
+    .command<ScaffoldCommandArgv>({
       command: '$0 <module>',
       builder: yargs => yargs
         .positional('module', {
@@ -40,54 +44,52 @@ async function main() {
         })
         ,
       handler: async (argv) => {
-        const files = new ApplyFiles()
-        const tasks = new ArrayTasks()
+        console.log('')
+        console.log(`scaffold: ${argv.module}`)
+        console.log('')
+
+        const files = createVirtualFiles()
+        const tasks = createTasks()
 
         // load the scaffold module
         const {prompts, factory} = await loadScaffoldFromModule(argv.module)
 
-        // extract options from user
-        const {_, $0, ...options} = yargs(argv._.map(String))
-          .strict()
-          .hide('help')
-          .hide('version')
-          .fail((message, error, parser) => {
-            console.log('')
-            console.log(`scaffold: ${argv.module}`)
-            console.log('')
-            parser.showHelp()
-            console.log('')
-            if (message) {
-              console.log(`💥 ${message}`)
-            } else {
-              console.log(`💥 ${error?.message}`)
-            }
-            process.exit(1)
-          })
-          .options(convertPromptsToYargsOptions(prompts))
-          .parseSync()
-        console.log('Options:', options)
+        // extract options from the command line args
+        const {options, error} = await extractOptionsFromYargsArgv(
+          prompts,
+          argv._.map(String)
+        )
+        if (error) {
+          console.log(error)
+          process.exitCode = 1
+          return
+        }
+        printOptions(options)
 
         // create the scaffold fn
         const scaffold = factory(options)
 
         // execute the scaffold fn
-        await scaffold(files, tasks)
+        await scaffold({files, tasks})
 
         // display a diff of the changes
-        // TODO: display diff nicer
-        console.log('Diff:', files.diff())
+        const diff = files.diff()
+        printDiff(diff)
 
         if (argv.apply) {
           // apply the file changes to disk
           files.apply()
           console.log('Changes applied.')
+          console.log('')
   
-          // run the post write tasks
+          // execute the tasks
           for (const task of tasks) {
             await task()
           }
-          console.log('Tasks complete.')
+          
+        } else {
+          console.log('Re-run the command with --apply to write the changes to disk.')
+          console.log('')
         }
         
       }
