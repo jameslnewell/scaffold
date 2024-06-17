@@ -1,6 +1,6 @@
 {
   "name": "@jameslnewell/scaffold",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "description": "A tool for scaffolding your projects",
   "type": "module",
   "bin": "dist/cli",
@@ -9,6 +9,9 @@
     "dist"
   ],
   "dependencies": {
+    "@inquirer/confirm": "^3.1.9",
+    "@inquirer/prompts": "^5.0.5",
+    "@octokit/rest": "^20.1.1",
     "ejs": "^3.1.10",
     "picomatch": "^4.0.2"
   },
@@ -42,10 +45,10 @@
   },
   "scripts": {
     "check:typing": "tsc",
-    "build": "swc ./src --strip-leading-paths --out-dir ./dist",
-    "chmod": "chmod +x ./dist/cli/main.js",
+    "build": "swc ./src --strip-leading-paths --out-dir ./dist --ignore '**/*.test.ts'",
+    "chmod": "chmod +x ./dist/cli.js",
     "develop": "npm run build -- --watch",
-    "example:greeting": "./dist/cli/main.js ./dist/example/greeting.js -- --name Bob",
+    "example:greeting": "./dist/cli.js ./dist/examples/greeting.js --apply -- --name Bob",
     "test": "jest"
   },
   "license": "MIT"

@@ -1,4 +1,4 @@
-import { createVirtualFiles } from "../createVirtualFiles.js";
+import { createStagedFiles } from "../createStagedFiles.js";
 import { createTasks } from "../createTasks.js";
 import { serial } from "./serial.js";
 

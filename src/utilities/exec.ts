@@ -1,8 +1,12 @@
 import { spawn } from "node:child_process"
 
-export function exec(cmd: string, args: string[]) {
+export interface ExecOptions {
+  cwd?: string | undefined
+}
+
+export function exec(cmd: string, args: string[], {cwd}: ExecOptions = {}) {
   return new Promise<void>((resolve, reject) => {
-    const child = spawn(cmd, args)
+    const child = spawn(cmd, args, {cwd})
 
     child.on('exit', (exitCode, signal) => {
       if (exitCode === 0) {

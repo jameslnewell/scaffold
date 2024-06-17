@@ -1,7 +1,7 @@
-import { ScaffoldTask, ScaffoldTasks } from "./types.js";
+import { Task, Tasks } from "./types.js";
 
-export function createTasks(): ScaffoldTasks {
-  const tasks: ScaffoldTask[] = []
+export function createTasks(): Tasks {
+  const tasks: Task[] = []
   return {
 
     queue(task) {

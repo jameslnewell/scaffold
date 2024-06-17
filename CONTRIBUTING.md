@@ -17,5 +17,5 @@ Manual testing:
 ```console
 npm run build
 npm run chmod
-./dist/cli/main.js ./dist/example/greeting.js -- --name Bob
+npm run example:greeting
 ```

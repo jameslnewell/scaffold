@@ -1,25 +1,35 @@
 
 // =============== CORE ===============
 
-export interface ScaffoldFiles {
-  exists(file: string): boolean
-  read(file: string): string
-  write(file: string, content: string): void
+interface Stats {
+  isFile: boolean
+  isDirectory: boolean
+}
+
+export interface Files {
+  stat(file: string): Stats | undefined
+  read(file: string): Buffer | undefined
+  write(file: string, content: Buffer): void
   delete(file: string): void
   list(directory: string): string[]
 }
 
-export interface ScaffoldTask {
-  (): Promise<void>
+interface TaskContext {
+  cwd: string
 }
 
-export interface ScaffoldTasks extends Iterable<ScaffoldTask> {
-  queue(task: ScaffoldTask): void
+export interface Task {
+  (context: TaskContext): Promise<void>
+}
+
+export interface Tasks extends Iterable<Task> {
+  queue(task: Task): void
 }
 
 export interface ScaffoldContext {
-  files: ScaffoldFiles
-  tasks: ScaffoldTasks
+  cwd: string
+  files: Files
+  tasks: Tasks
 }
 
 export interface Scaffold {
