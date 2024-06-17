@@ -1,13 +1,15 @@
 # @jameslnewell/scaffold
 
+A framework for writing generators to scaffold out new projects.
+
 ## Usage
 Use `npm x` to install and run the _latest_ version of the `scaffold` CLI.
 
-Installing and running a scaffold published on NPM:
+Running a scaffold published on NPM:
 ```console
 npm x \
-  -p @jameslnewell/scaffold \
-  -p some-scaffold-package \
+  -p @jameslnewell/scaffold@latest \
+  -p some-scaffold-package@latest \
   scaffold \
     some-scaffold-package/some-scaffold-module \
     --apply \
@@ -18,7 +20,7 @@ npm x \
 Running a scaffold located on your local machine:
 ```console
 npm x \
-  -p @jameslnewell/scaffold \
+  -p @jameslnewell/scaffold@latest \
   scaffold \
     --apply \
     ./path/to/some-scaffold/some-scaffold-module.js \
@@ -41,7 +43,7 @@ export const prompts = {
 } satisfies ScaffoldPrompts
 
 export const factory: ScaffoldFactory<ScaffoldOptions<typeof prompts>> = ({name}) => {
-  return ({files, tasks}) => {
+  return ({cwd, files, tasks}) => {
     files.write('greeting.txt', `Hello ${name}!`)
   }
 }
