@@ -3,6 +3,8 @@
 A framework for writing generators to scaffold out new projects.
 
 ## Usage
+Requires Node.js 24 or later.
+
 Use `npm x` to install and run the _latest_ version of the `scaffold` CLI.
 
 Running a scaffold published on NPM:
@@ -27,6 +29,8 @@ npm x \
     -- \
     --some=option
 ```
+
+The scaffold module is resolved from the current directory (or `--cwd`) the same way an `import` would be, so a scaffold module must either be exposed through its package's `exports` or be referenced with its file extension.
 
 ## Authoring a scaffold
 

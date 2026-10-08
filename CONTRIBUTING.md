@@ -2,7 +2,7 @@
 
 This repository is a [pnpm workspace](https://pnpm.io/workspaces) with packages located under `packages/*`.
 
-Use the pnpm version pinned in the root `package.json` `packageManager` field (e.g. via `corepack enable`).
+Use the Node.js version in `.nvmrc` (e.g. via `nvm use`) and the pnpm version pinned in the root `package.json` `packageManager` field (e.g. via `corepack enable`).
 
 ## Installation
 
