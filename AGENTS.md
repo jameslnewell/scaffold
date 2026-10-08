@@ -17,6 +17,7 @@ This is a pnpm workspace with a single package, [`packages/scaffold`](packages/s
 Run from the repository root:
 
 - `pnpm install`
+- `pnpm run check:formatting` (`pnpm run fix:formatting` to fix)
 - `pnpm run check:linting` (`pnpm run fix:linting` to fix)
 - `pnpm run check:typing`
 - `pnpm run test`
@@ -29,4 +30,4 @@ For a manual end-to-end check, run `pnpm run example:greeting` from `packages/sc
 - ESM: use `.js` extensions in relative imports from TypeScript source
 - Unit tests live next to the source as `*.test.ts`
 - Export new public helpers from `src/lib.ts` and document them in [`packages/scaffold/README.md`](packages/scaffold/README.md)
-- There is no formatter, so match the surrounding formatting and keep diffs minimal
+- Format with prettier (`pnpm run fix:formatting`) rather than by hand

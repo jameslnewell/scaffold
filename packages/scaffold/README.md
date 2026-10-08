@@ -15,6 +15,7 @@ Requires Node.js 24 or later.
 Use `npm x` to install and run the _latest_ version of the `scaffold` CLI.
 
 Running a scaffold published on NPM:
+
 ```console
 npm x \
   -p @jameslnewell/scaffold@latest \
@@ -27,6 +28,7 @@ npm x \
 ```
 
 Running a scaffold located on your local machine:
+
 ```console
 npm x \
   -p @jameslnewell/scaffold@latest \
@@ -62,34 +64,44 @@ A scaffold module is an ES module which exports:
 - `factory` - a function which receives those options and returns the scaffold
 
 ```ts
-import {ScaffoldFactory, ScaffoldPrompts, ScaffoldOptions, chain, file, json, queueTask, npm, git, serial} from '@jameslnewell/scaffold'
+import {
+  ScaffoldFactory,
+  ScaffoldPrompts,
+  ScaffoldOptions,
+  chain,
+  file,
+  json,
+  queueTask,
+  npm,
+  git,
+  serial,
+} from '@jameslnewell/scaffold';
 
-const templates = `${import.meta.dirname}/templates`
+const templates = `${import.meta.dirname}/templates`;
 
 export const prompts = {
   name: {
     type: 'string',
-    description: 'The name of the package'
+    description: 'The name of the package',
   },
   private: {
     type: 'boolean',
     optional: true,
-    description: 'Whether the package is private'
-  }
-} satisfies ScaffoldPrompts
+    description: 'Whether the package is private',
+  },
+} satisfies ScaffoldPrompts;
 
-export const factory: ScaffoldFactory<ScaffoldOptions<typeof prompts>> = ({name, private: isPrivate}) => {
+export const factory: ScaffoldFactory<ScaffoldOptions<typeof prompts>> = ({
+  name,
+  private: isPrivate,
+}) => {
   return chain([
     file.copy(`${templates}/license.txt`, 'license.txt'),
     file.template(`${templates}/README.md.ejs`, 'README.md', {name}),
     json.merge('package.json', {name, private: isPrivate ?? false}),
-    queueTask(serial([
-      npm.install(),
-      git.init(),
-      git.add(),
-    ])),
-  ])
-}
+    queueTask(serial([npm.install(), git.init(), git.add()])),
+  ]);
+};
 ```
 
 ### Prompts

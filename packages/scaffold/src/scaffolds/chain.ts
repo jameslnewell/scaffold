@@ -1,9 +1,9 @@
-import type { Scaffold } from "../types.js";
+import type {Scaffold} from '../types.js';
 
 export function chain(scaffolds: Scaffold[]): Scaffold {
   return async (context) => {
     for (const scaffold of scaffolds) {
-      await scaffold(context)
+      await scaffold(context);
     }
-  }
+  };
 }
