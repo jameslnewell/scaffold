@@ -51,6 +51,20 @@ describe(createHostFiles, () => {
     })
   })
 
+  describe('.list()', () => {
+    test('returns the files nested within the directory', () => {
+      fs.mkdirSync(path.join(cwd, 'foo/baz/qux'), {recursive: true})
+      fs.writeFileSync(path.join(cwd, 'foo/baz/qux/quux'), '')
+      fs.writeFileSync(path.join(cwd, 'foo/baz/corge'), '')
+      const files = createHostFiles({cwd})
+      expect(files.list(cwd)).toEqual([
+        path.join(cwd, 'foo/bar'),
+        path.join(cwd, 'foo/baz/corge'),
+        path.join(cwd, 'foo/baz/qux/quux'),
+      ])
+    })
+  })
+
   describe('.write()', () => {
     test('writes a file', () => {
       const file = 'foo/bar'

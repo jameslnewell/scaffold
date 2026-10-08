@@ -53,21 +53,10 @@ export function createHostFiles({cwd = process.cwd(), fs}: CreateHostFilesOption
     },
 
     list(directory: string) {
-      // <node@20 doesn't have the recursive flag so we use a stack
-      const stack: string[] = [directory]
-      const files: Set<string> = new Set()
-      let currentDirectory: string | undefined
-      while ((currentDirectory = stack.pop())) {
-        for (const entry of host.readdirSync(currentDirectory, {withFileTypes: true})) {
-          const entryPath = path.join(currentDirectory, entry.name)
-          if (entry.isDirectory()) {
-            stack.push(entryPath)
-          } else if (entry.isFile()) {
-            files.add(path.normalize(entryPath))
-          }
-        }
-      }
-      return Array.from(files).sort()
+      return host.readdirSync(directory, {recursive: true, withFileTypes: true})
+        .filter(entry => entry.isFile())
+        .map(entry => path.normalize(path.join(entry.parentPath, entry.name)))
+        .sort()
     },
   }
 
