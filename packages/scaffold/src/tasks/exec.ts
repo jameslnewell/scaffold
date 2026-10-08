@@ -1,6 +1,6 @@
 import * as path from "node:path"
-import type { Task } from "../types.js"
 import {type ExecOptions, exec as execFn} from '../utilities/exec.js'
+import type { Task } from "../types.js"
 
 export function exec(cmd: string, args: string[], options: ExecOptions = {}): Task {
   return async (ctx) => {

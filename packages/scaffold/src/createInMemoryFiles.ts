@@ -11,21 +11,18 @@ export function createInMemoryFiles({
   files = {}
 }: CreateInMemoryFilesOptions = {}): Files {
 
-  files = Object.entries(files).reduce<Record<string, Buffer | undefined>>(((f, [file, content]) => {
-    f[path.resolve(file)] = content
-    return f
-  }), {})
+  const contents = new Map(Object.entries(files).map(([file, content]) => [path.resolve(file), content]))
 
   return {
 
     stat(file) {
       file = path.resolve(cwd, file)
-      if (files[file]) {
+      if (contents.get(file)) {
         return {
           isFile: true,
           isDirectory: false
         }
-      } else if (Object.keys(files).find(f => f.startsWith(`${file}/`))) {
+      } else if ([...contents.keys()].find(f => f.startsWith(`${file}/`))) {
         return {
           isFile: false,
           isDirectory: true
@@ -37,7 +34,7 @@ export function createInMemoryFiles({
 
     read(file) {
       file = path.resolve(cwd, file)
-      const content = files[file]
+      const content = contents.get(file)
       if (content) {
         return content
       } else {
@@ -47,17 +44,17 @@ export function createInMemoryFiles({
 
     write(file, content) {
       file = path.resolve(cwd, file)
-      files[file] = content
+      contents.set(file, content)
     },
 
     delete(file: string) {
       file = path.resolve(cwd, file)
-      delete files[file]
+      contents.delete(file)
     },
 
     list(directory: string) {
       directory = path.resolve(cwd, directory)
-      const list: string[] = Object.keys(files).filter(fileName => {
+      const list: string[] = [...contents.keys()].filter(fileName => {
         return fileName.startsWith(`${directory}/`)
       })
       return list.sort()

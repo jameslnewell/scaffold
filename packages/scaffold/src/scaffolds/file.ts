@@ -1,5 +1,5 @@
-import * as path from "node:path";
 import * as ejs from 'ejs'
+import * as path from "node:path";
 import type { Scaffold } from "../types.js";
 import { match } from "../utilities/match.js";
 
@@ -12,7 +12,7 @@ function rename(sourceDir: string, destDir: string): (file: string) => string {
  * Will replace the file if it already exists
  */
 export function write(file: string, content: string | Buffer): Scaffold {
-  return async ({files}) => files.write(file, typeof content === 'string' ? Buffer.from(content) : content)
+  return ({files}) => { files.write(file, typeof content === 'string' ? Buffer.from(content) : content); }
 }
 
 interface CopyOptions {
@@ -29,7 +29,7 @@ export function copy(
   to: string, 
   options: CopyOptions = {}
 ): Scaffold {
-  return async ({cwd, files}) => {
+  return ({cwd, files}) => {
     const result = match(from, options.globOptions)({cwd, files})
 
     if (!result) throw Error(`Invalid source - not a glob, not a directory, not a file`)
@@ -43,10 +43,8 @@ export function copy(
     } else if (result.type === 'directory') {
       // TODO: check destination is a directory
       name = rename(from, to)
-    } else if (result.type === 'file') {
-      name = _file => to
     } else {
-      throw new Error('Shouldn\'t exist')
+      name = () => to
     }
 
     for (const file of result.files) {
@@ -71,7 +69,7 @@ export function move(
   to: string, 
   options: MoveOptions = {}
 ): Scaffold {
-  return async ({cwd, files}) => {
+  return ({cwd, files}) => {
     const result = match(from, options.globOptions)({cwd, files})
 
     if (!result) throw Error(`Invalid source - not a glob, not a directory, not a file`)
@@ -85,11 +83,9 @@ export function move(
     } else if (result.type === 'directory') {
       // TODO: check destination is a directory
       name = rename(from, to)
-    } else if (result.type === 'file') {
-      // TODO: check destination does not exist
-      name = _file => to
     } else {
-      throw new Error('Shouldn\'t exist')
+      // TODO: check destination does not exist
+      name = () => to
     }
 
     for (const file of result.files) {
@@ -114,7 +110,7 @@ export function rm(
   from: string, 
   options: RmOptions = {}
 ): Scaffold {
-  return async ({cwd, files}) => {
+  return ({cwd, files}) => {
     const result = match(from, options.globOptions)({cwd, files})
 
     if (!result) throw Error(`Invalid source - not a glob, not a directory, not a file`)
@@ -139,10 +135,10 @@ interface TemplateOptions {
 export function template(
   from: string, 
   to: string, 
-  data: Record<string, any>,
+  data: ejs.Data,
   options: TemplateOptions = {}
 ): Scaffold {
-  return async ({cwd, files}) => {
+  return ({cwd, files}) => {
     const result = match(from, options.globOptions)({cwd, files})
 
     if (!result) throw Error(`Invalid source - not a glob, not a directory, not a file`)
@@ -156,11 +152,9 @@ export function template(
     } else if (result.type === 'directory') {
       // TODO: check destination is a directory
       name = rename(from, to)
-    } else if (result.type === 'file') {
-      // TODO: check destination does not exist
-      name = _file => to
     } else {
-      throw new Error('Shouldn\'t exist')
+      // TODO: check destination does not exist
+      name = () => to
     }
   
     for (const file of result.files) {

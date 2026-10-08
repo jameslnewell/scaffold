@@ -1,11 +1,11 @@
-import type { ScaffoldFactory, ScaffoldOptions, ScaffoldPrompts } from '../types.js'
-import { serial } from '../tasks/serial.js'
-import * as npm from '../tasks/npm.js'
+import * as file from '../scaffolds/file.js'
 import * as git from '../tasks/git.js'
 import * as json from '../scaffolds/json.js'
-import * as file from '../scaffolds/file.js'
-import { queueTask } from '../scaffolds/queueTask.js'
+import * as npm from '../tasks/npm.js'
+import type { ScaffoldFactory, ScaffoldOptions, ScaffoldPrompts } from '../types.js'
 import { chain } from '../scaffolds/chain.js'
+import { queueTask } from '../scaffolds/queueTask.js'
+import { serial } from '../tasks/serial.js'
 
 const scaffoldRootDirectory = `${import.meta.dirname}/../..`
 

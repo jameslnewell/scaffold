@@ -1,5 +1,5 @@
-import type { ScaffoldFactory, ScaffoldPrompts } from "./types.js"
 import * as path from 'node:path'
+import type { ScaffoldFactory, ScaffoldPrompts } from "./types.js"
 import { pathToFileURL } from 'node:url'
 import { resolve } from 'import-meta-resolve'
 
@@ -9,7 +9,7 @@ interface LoadScaffoldFromModuleOptions {
 
 interface LoadScaffoldFromModuleOutput {
   prompts: ScaffoldPrompts
-  factory: ScaffoldFactory<any>
+  factory: ScaffoldFactory
 }
 
 /**
@@ -26,15 +26,16 @@ export async function loadScaffoldFromModule(id: string, {cwd = process.cwd()}: 
   const url = path.isAbsolute(id)
     ? pathToFileURL(id).href
     : resolve(id, pathToFileURL(path.join(cwd, path.sep)).href)
-  const module = await import(url)
+  const module = await import(url) as {prompts?: unknown, factory?: unknown}
   
   const prompts = module.prompts
-  if (typeof prompts === undefined) throw new Error(`Scaffold module ${id} is missing prompts`)
-  if (typeof prompts !== 'object') throw new Error(`Scaffold module ${id} has invalid prompts`)
+  if (prompts === undefined) throw new Error(`Scaffold module ${id} is missing prompts`)
+  if (typeof prompts !== 'object' || prompts === null) throw new Error(`Scaffold module ${id} has invalid prompts`)
   
   const factory = module.factory
-  if (typeof factory === undefined) throw new Error(`Scaffold module ${id} is missing factory`)
+  if (factory === undefined) throw new Error(`Scaffold module ${id} is missing factory`)
   if (typeof factory !== 'function') throw new Error(`Scaffold module ${id} has an invalid factory`)
 
-  return {prompts, factory}
+  // the shapes of the prompts and factory are trusted rather than validated in depth
+  return {prompts: prompts as ScaffoldPrompts, factory: factory as ScaffoldFactory}
 }

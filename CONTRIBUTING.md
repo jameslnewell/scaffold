@@ -10,6 +10,13 @@ Use the Node.js version in `.nvmrc` (e.g. via `nvm use`) and the pnpm version pi
 pnpm install
 ```
 
+## Linting
+
+```console
+pnpm run check:linting
+pnpm run fix:linting
+```
+
 ## Testing
 
 Unit testing (all packages):

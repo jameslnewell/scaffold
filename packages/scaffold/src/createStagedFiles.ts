@@ -47,8 +47,8 @@ export function createStagedFiles({cwd, host}: CreateStagedFilesOptions): Staged
     read(file) {
       file = path.resolve(cwd, file)
       const change = changes[file]
-      if (change && change.type === 'WRITE') return change.content
-      if (change && change.type === 'DELETE') return undefined
+      if (change?.type === 'WRITE') return change.content
+      if (change?.type === 'DELETE') return undefined
       return host.read(file)
     },
 
@@ -94,7 +94,7 @@ export function createStagedFiles({cwd, host}: CreateStagedFilesOptions): Staged
           } else {
             diff[relativeFileName] = 'C'
           }
-        } else if (fileChange.type === 'DELETE') {
+        } else {
           diff[relativeFileName] = 'D'
         }
       }
@@ -106,7 +106,7 @@ export function createStagedFiles({cwd, host}: CreateStagedFilesOptions): Staged
       for (const [fileName, fileChange] of Object.entries<VirtualFilesChange>(changes)) {
         if (fileChange.type === 'WRITE') {
           host.write(fileName, fileChange.content)
-        } else if (fileChange.type === 'DELETE') {
+        } else {
           host.delete(fileName)
         }
       }

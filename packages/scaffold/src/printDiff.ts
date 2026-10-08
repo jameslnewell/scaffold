@@ -1,9 +1,9 @@
 import type { StagedFilesystemDiff } from "./createStagedFiles.js"
 
-export function printDiff(diff: StagedFilesystemDiff) {
+export function printDiff(diff: StagedFilesystemDiff): void {
   console.log('diff:')
-  for (const fileName of Object.keys(diff).sort()) {
-    console.log(`  ‣ ${diff[fileName]} ${fileName}`)
+  for (const [fileName, status] of Object.entries(diff).sort(([a], [b]) => a.localeCompare(b))) {
+    console.log(`  ‣ ${status} ${fileName}`)
   }
   console.log('')
 }

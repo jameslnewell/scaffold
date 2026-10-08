@@ -32,8 +32,8 @@ export function createHostFiles({cwd = process.cwd(), fs}: CreateHostFilesOption
       file = path.resolve(cwd, file)
       try {
         return host.readFileSync(file)
-      } catch (error: any) {
-        if (error?.code === 'ENOENT') {
+      } catch (error) {
+        if (error instanceof Error && 'code' in error && error.code === 'ENOENT') {
           return undefined
         } else {
           throw error

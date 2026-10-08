@@ -19,7 +19,7 @@ export function convertPromptsToYargsOptions(prompts: ScaffoldPrompts): { [key: 
       demandOption: !optional,
       description: description,
 
-      coerce: (value) => {
+      coerce: (value: unknown): unknown => {
         if (array) 
           return Array.isArray(value) ? value : [value]
         return value

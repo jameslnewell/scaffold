@@ -1,7 +1,7 @@
-import {afterEach, beforeEach, describe, expect, test, vi} from 'vitest'
 import * as fs from 'node:fs'
 import * as os from 'node:os'
 import * as path from 'node:path'
+import {afterEach, beforeEach, describe, expect, test, vi} from 'vitest'
 import { createHostFiles } from "./createHostFiles.js";
 
 describe(createHostFiles, () => {
@@ -74,7 +74,7 @@ describe(createHostFiles, () => {
         writeFileSync
       }})
       files.write(file, content)
-      expect(writeFileSync).toBeCalledWith(`${process.cwd()}/${file}`, content)
+      expect(writeFileSync).toHaveBeenCalledWith(`${process.cwd()}/${file}`, content)
     })
   })
 
@@ -86,7 +86,7 @@ describe(createHostFiles, () => {
         rmSync
       }})
       files.delete(file)
-      expect(rmSync).toBeCalledWith(`${process.cwd()}/${file}`)
+      expect(rmSync).toHaveBeenCalledWith(`${process.cwd()}/${file}`)
     })
 
     test('throws when the file does not exist', () => {
@@ -94,7 +94,7 @@ describe(createHostFiles, () => {
       const files = createHostFiles({fs: {
         rmSync: vi.fn(() => {throw new Error('File does not exist')})
       }})
-      expect(() => files.delete(file)).toThrow()
+      expect(() => { files.delete(file); }).toThrow()
     })
   })
 })

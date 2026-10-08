@@ -6,7 +6,7 @@ export interface ExecOptions {
   cwd?: string | undefined
 }
 
-export function exec(cmd: string, args: string[], {cwd}: ExecOptions = {}) {
+export function exec(cmd: string, args: string[], {cwd}: ExecOptions = {}): Promise<void> {
   return new Promise<void>((resolve, reject) => {
     const child = spawn(cmd, args, {cwd})
 
@@ -14,7 +14,7 @@ export function exec(cmd: string, args: string[], {cwd}: ExecOptions = {}) {
       if (exitCode === 0) {
         resolve()
       } else {
-        reject(new Error(`Process exited with exitCode=${exitCode} signal=${signal}`))
+        reject(new Error(`Process exited with exitCode=${String(exitCode)} signal=${String(signal)}`))
       }
     })
 
