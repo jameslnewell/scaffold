@@ -59,12 +59,12 @@
   },
   "scripts": {
     "check:typing": "tsc",
-    "build": "rm -rf ./dist && pnpm run build:js && pnpm run build:types && chmod +x ./dist/cli.js",
-    "build:js": "swc ./src --strip-leading-paths --out-dir ./dist --ignore '**/*.test.ts'",
+    "build": "node -e \"fs.rmSync('dist', {recursive: true, force: true})\" && pnpm run build:js && pnpm run build:types",
+    "build:js": "swc ./src --strip-leading-paths --out-dir ./dist --ignore \"**/*.test.ts\"",
     "build:types": "tsc -p tsconfig.build.json",
     "develop": "pnpm run build:js --watch",
-    "example:greeting": "mkdir -p ./tmp/greeting && node ./dist/cli.js \"$PWD/dist/examples/greeting.js\" --cwd ./tmp/greeting --apply -- --name Bob",
-    "test": "NODE_OPTIONS=--experimental-vm-modules jest"
+    "example:greeting": "node -e \"fs.mkdirSync('tmp/greeting', {recursive: true})\" && node ./dist/cli.js ../../dist/examples/greeting.js --cwd ./tmp/greeting --apply -- --name Bob",
+    "test": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js"
   },
   "engines": {
     "node": ">=24"
