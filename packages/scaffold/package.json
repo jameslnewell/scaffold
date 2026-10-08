@@ -61,7 +61,7 @@
     "build:js": "swc ./src --strip-leading-paths --out-dir ./dist --ignore '**/*.test.ts'",
     "build:types": "tsc -p tsconfig.build.json",
     "develop": "pnpm run build:js --watch",
-    "example:greeting": "./dist/cli.js ./dist/examples/greeting.js --apply -- --name Bob",
+    "example:greeting": "mkdir -p ./tmp/greeting && ./dist/cli.js \"$PWD/dist/examples/greeting.js\" --cwd ./tmp/greeting --apply -- --name Bob",
     "test": "jest"
   },
   "license": "MIT"

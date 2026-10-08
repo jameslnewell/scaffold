@@ -2,7 +2,6 @@ import { ScaffoldFactory, ScaffoldOptions, ScaffoldPrompts } from '../types.js'
 import { serial } from '../tasks/serial.js'
 import * as npm from '../tasks/npm.js'
 import * as git from '../tasks/git.js'
-import * as github from '../tasks/github.js'
 import * as json from '../scaffolds/json.js'
 import * as file from '../scaffolds/file.js'
 import { queueTask } from '../scaffolds/queueTask.js'
@@ -28,8 +27,10 @@ export const factory: ScaffoldFactory<ScaffoldOptions<typeof prompts>> = ({name}
       body: 'On this wet and rainy day we have had over 40mm since 9am!'
     }),
 
-    json.merge('greeting.json', {
-      name: 'foobar',
+    // writing a package.json scopes npm install to the target directory
+    json.merge('package.json', {
+      name: 'greeting',
+      private: true,
       scripts: {
         setup: 'echo "Hello World!"'
       }
@@ -37,23 +38,10 @@ export const factory: ScaffoldFactory<ScaffoldOptions<typeof prompts>> = ({name}
 
     queueTask(serial([
       npm.install(),
-      // npm.run('setup'),
+      npm.run('setup'),
       git.init(),
       git.add(),
       // git.commit(),
-      github.createRepo('jameslnewell/scaffold-test'),
-      github.addUserToRepo({
-        repo: 'jameslnewell/scaffold-test', 
-        user: 'jameslnewell-bot', 
-        permission: 'push'
-      }),
-      // github.addTeamToRepo({
-      //   repo: 'jameslnewell/scaffold-test', 
-      //   team: 'jameslnewell/developers', 
-      //   permission: 'push'
-      // }),
-      // git.addRemote(),
-      // git.push()
     ]))
 
   ])
