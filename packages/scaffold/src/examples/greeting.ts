@@ -22,7 +22,7 @@ export const factory: ScaffoldFactory<ScaffoldOptions<typeof prompts>> = ({name}
     
     file.copy(`${scaffoldRootDirectory}/fixtures/license.txt`, 'license.txt'),
 
-    file.template(`${scaffoldRootDirectory}/fixtures/post.md.tpl`, 'posts', {
+    file.template(`${scaffoldRootDirectory}/fixtures/post.md.tpl`, 'post.md', {
       title: 'One wet and rainy day ☔️', 
       body: 'On this wet and rainy day we have had over 40mm since 9am!'
     }),
