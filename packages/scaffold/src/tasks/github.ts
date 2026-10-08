@@ -25,10 +25,6 @@ function createClient(): Octokit {
   })
 }
 
-function isNotFoundError(error: unknown): boolean {
-  return typeof error === 'object' && error !== null && 'status' in error && error.status === 404
-}
-
 // TODO: option to error if already exists
 /**
  * @param repo The repository e.g. jameslnewell/repository
@@ -43,7 +39,8 @@ export function createRepo(repo: string): Task {
       await octokit.repos.get({owner: owner, repo: repository})
       return
     } catch (error) {
-      if (!isNotFoundError(error)) throw error
+      const isNotFound = typeof error === 'object' && error !== null && 'status' in error && error.status === 404
+      if (!isNotFound) throw error
     }
 
     const user = await octokit.users.getAuthenticated()

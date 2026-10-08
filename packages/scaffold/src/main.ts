@@ -22,13 +22,14 @@ async function main(): Promise<void> {
     .scriptName('scaffold')
     .hide('help')
     .hide('version')
-    .fail((message, error, parser) => {
+    // yargs types the error as always present, but it is undefined for validation failures
+    .fail((message, error: Error | undefined, parser) => {
       parser.showHelp()
       console.log('')
       if (message) {
         console.log(`💥 ${message}`)
       } else {
-        console.log(`💥 ${error.message}`)
+        console.log(`💥 ${error?.message ?? 'An unknown error occurred'}`)
       }
       process.exit(1)
     })

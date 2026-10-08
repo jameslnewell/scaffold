@@ -10,9 +10,9 @@ export async function extractOptionsFromYargsArgv(prompts: ScaffoldPrompts, argv
     .fail(false) 
     .options(convertPromptsToYargsOptions(prompts))
   try {
-    const argv = parser.parseSync()
+    const parsedArgv = parser.parseSync()
     // omit the positional args and script name, and trust yargs to have validated the values against the prompts
-    const options = Object.fromEntries(Object.entries(argv).filter(([key]) => key !== '_' && key !== '$0')) as ScaffoldOptions<ScaffoldPrompts>
+    const options = Object.fromEntries(Object.entries(parsedArgv).filter(([key]) => key !== '_' && key !== '$0')) as ScaffoldOptions<ScaffoldPrompts>
     return {options, error: undefined}
   } catch (error) {
     return {
