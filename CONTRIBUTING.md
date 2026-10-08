@@ -21,6 +21,5 @@ Manual testing:
 ```console
 cd packages/scaffold
 pnpm run build
-pnpm run chmod
 pnpm run example:greeting
 ```

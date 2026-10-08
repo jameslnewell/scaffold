@@ -30,10 +30,10 @@ npm x \
 
 ## Authoring a scaffold
 
-A scaffold is just a function which modifies a set of files.
+A scaffold is just a function which modifies a set of files and optionally queues tasks to run after the files are written.
 
 ```ts
-import {ScaffoldFactory, ScaffoldPrompts, ScaffoldOptions} from '@jameslnewell/scaffold'
+import {ScaffoldFactory, ScaffoldPrompts, ScaffoldOptions, chain, file, queueTask, exec} from '@jameslnewell/scaffold'
 
 export const prompts = {
   name: {
@@ -43,9 +43,14 @@ export const prompts = {
 } satisfies ScaffoldPrompts
 
 export const factory: ScaffoldFactory<ScaffoldOptions<typeof prompts>> = ({name}) => {
-  return ({cwd, files, tasks}) => {
-    files.write('greeting.txt', `Hello ${name}!`)
-  }
+  return chain([
+    file.write('greeting.txt', `Hello ${name}!`),
+    queueTask(exec('cat', ['greeting.txt'])),
+  ])
 }
 ```
 
+The package exports these helpers:
+
+- scaffolds: `chain`, `queueTask`, `file` (`write`, `copy`, `move`, `rm`, `template`) and `json` (`merge`, `transform`)
+- tasks: `exec`, `serial`, `parallel`, `npm`, `git` and `github`
