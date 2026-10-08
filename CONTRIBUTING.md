@@ -1,21 +1,26 @@
 # Contributing
 
+This repository is a [pnpm workspace](https://pnpm.io/workspaces) with packages located under `packages/*`.
+
+Use the pnpm version pinned in the root `package.json` `packageManager` field (e.g. via `corepack enable`).
+
 ## Installation
 
 ```console
-npm i
+pnpm install
 ```
 
 ## Testing
 
-Unit testing:
+Unit testing (all packages):
 ```console
-npm run test
+pnpm run test
 ```
 
 Manual testing:
 ```console
-npm run build
-npm run chmod
-npm run example:greeting
+cd packages/scaffold
+pnpm run build
+pnpm run chmod
+pnpm run example:greeting
 ```
