@@ -1,4 +1,4 @@
-import { Task, Tasks } from "./types.js";
+import type { Task, Tasks } from "./types.js";
 
 export function createTasks(): Tasks {
   const tasks: Task[] = []

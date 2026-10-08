@@ -1,4 +1,4 @@
-import { jest } from '@jest/globals'
+import {afterEach, beforeEach, describe, expect, test, vi} from 'vitest'
 import * as fs from 'node:fs'
 import * as os from 'node:os'
 import * as path from 'node:path'
@@ -69,7 +69,7 @@ describe(createHostFiles, () => {
     test('writes a file', () => {
       const file = 'foo/bar'
       const content = Buffer.from('Hello World!')
-      const writeFileSync = jest.fn()
+      const writeFileSync = vi.fn()
       const files = createHostFiles({fs: {
         writeFileSync
       }})
@@ -81,7 +81,7 @@ describe(createHostFiles, () => {
   describe('.delete()', () => {
     test('deletes a file', () => {
       const file = 'foo/bar'
-      const rmSync = jest.fn()
+      const rmSync = vi.fn()
       const files = createHostFiles({fs: {
         rmSync
       }})
@@ -92,7 +92,7 @@ describe(createHostFiles, () => {
     test('throws when the file does not exist', () => {
       const file = 'foo/bar'
       const files = createHostFiles({fs: {
-        rmSync: jest.fn(() => {throw new Error('File does not exist')})
+        rmSync: vi.fn(() => {throw new Error('File does not exist')})
       }})
       expect(() => files.delete(file)).toThrow()
     })

@@ -1,4 +1,4 @@
-import { ScaffoldOptions } from "./types.js"
+import type { ScaffoldOptions } from "./types.js"
 
 export function printOptions(options: ScaffoldOptions<{}>) {
   console.log('options:')

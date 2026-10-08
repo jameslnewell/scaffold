@@ -1,6 +1,6 @@
 import * as NodeFs from 'node:fs'
 import * as path from 'node:path'
-import { Files } from './types.js'
+import type { Files } from './types.js'
 
 export interface CreateHostFilesOptions {
   cwd?: string | undefined

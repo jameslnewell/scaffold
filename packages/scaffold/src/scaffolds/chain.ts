@@ -1,4 +1,4 @@
-import { Scaffold } from "../types.js";
+import type { Scaffold } from "../types.js";
 
 export function chain(scaffolds: Scaffold[]): Scaffold {
   return async (context) => {

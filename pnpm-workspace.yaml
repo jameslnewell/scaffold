@@ -1,5 +1,6 @@
 packages:
   - packages/*
 
-allowBuilds:
-  '@swc/core': true
+minimumReleaseAgeExclude:
+  - '@jameslnewell/typescript-config@7.0.0'
+  - '@jameslnewell/vitest-config@7.0.0'

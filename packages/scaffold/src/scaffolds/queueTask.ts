@@ -1,4 +1,4 @@
-import { Scaffold, Task } from "../types.js";
+import type { Scaffold, Task } from "../types.js";
 
 export function queueTask(task: Task): Scaffold {
   return async ({tasks}) => {

@@ -1,4 +1,4 @@
-import { jest } from '@jest/globals'
+import {describe, expect, test, vi} from 'vitest'
 import { createInMemoryFiles } from "./createInMemoryFiles.js";
 import { createStagedFiles } from "./createStagedFiles.js";
 
@@ -148,7 +148,7 @@ describe(createStagedFiles, () => {
 
     test('does not write files to disk when no files have changed', () => {
       const hostFiles = createInMemoryFiles({ files: {}})
-      const mockWriteFn = jest.spyOn(hostFiles, 'write')
+      const mockWriteFn = vi.spyOn(hostFiles, 'write')
       const files = createStagedFiles({cwd: process.cwd(), host: hostFiles})
       files.apply()
       expect(mockWriteFn).not.toBeCalled()
@@ -156,7 +156,7 @@ describe(createStagedFiles, () => {
   
     test('does not delete files from disk when no files have changed', () => {
       const hostFiles = createInMemoryFiles({ files: {}})
-      const mockDeleteFn = jest.spyOn(hostFiles, 'delete')
+      const mockDeleteFn = vi.spyOn(hostFiles, 'delete')
       const files = createStagedFiles({cwd: process.cwd(), host: hostFiles})
       files.apply()
       expect(mockDeleteFn).not.toBeCalled()
@@ -166,7 +166,7 @@ describe(createStagedFiles, () => {
       const file = 'foo/bar'
       const content = Buffer.from('Hello World!')
       const hostFiles = createInMemoryFiles({ files: {}})
-      const mockWriteFn = jest.spyOn(hostFiles, 'write')
+      const mockWriteFn = vi.spyOn(hostFiles, 'write')
       const files = createStagedFiles({cwd: process.cwd(), host: hostFiles})
       files.write(file, content)
       files.apply()
@@ -176,7 +176,7 @@ describe(createStagedFiles, () => {
     test('deletes files from disk when files have changed', () => {
       const file = 'foo/bar'
       const hostFiles = createInMemoryFiles({ files: {}})
-      const mockDeleteFn = jest.spyOn(hostFiles, 'delete')
+      const mockDeleteFn = vi.spyOn(hostFiles, 'delete')
       const files = createStagedFiles({
         cwd: process.cwd(),
         host: hostFiles

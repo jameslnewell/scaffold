@@ -1,15 +1,15 @@
-import { jest } from '@jest/globals'
+import {describe, expect, test, vi} from 'vitest'
 import { createTasks } from "../createTasks.js";
 import { chain } from "./chain.js";
 import { createInMemoryFiles } from "../createInMemoryFiles.js";
-import { Scaffold } from "../types.js";
+import type { Scaffold } from "../types.js";
 
 describe(chain, () => {
   test('each fn in the chain is called', async () => {
     const files = createInMemoryFiles()
     const tasks = createTasks()
-    const fn1 = jest.fn<Scaffold>()
-    const fn2 = jest.fn<Scaffold>()
+    const fn1 = vi.fn<Scaffold>()
+    const fn2 = vi.fn<Scaffold>()
     const context = {cwd: process.cwd(), files, tasks}
     await chain([fn1, fn2])(context)
     expect(fn1).toHaveBeenCalledWith(context)
