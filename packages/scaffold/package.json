@@ -59,7 +59,7 @@
   },
   "scripts": {
     "check:typing": "tsc",
-    "build": "node -e \"fs.rmSync('dist', {recursive: true, force: true})\" && pnpm run build:js && pnpm run build:types",
+    "build": "node -e \"fs.rmSync('dist', {recursive: true, force: true})\" && pnpm run build:js && pnpm run build:types && node -e \"fs.chmodSync('dist/cli.js', 0o755)\"",
     "build:js": "swc ./src --strip-leading-paths --out-dir ./dist --ignore \"**/*.test.ts\"",
     "build:types": "tsc -p tsconfig.build.json",
     "develop": "pnpm run build:js --watch",
