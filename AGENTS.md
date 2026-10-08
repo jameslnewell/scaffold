@@ -1,6 +1,6 @@
 # Agent instructions
 
-`scaffold` is a CLI and set of utilities for codifying project boilerplate as reusable scaffolds and generating new codebases from them. See [README.md](README.md).
+`scaffold` is a CLI and set of utilities for codifying project boilerplate and generating new codebases from it. See [README.md](README.md).
 
 ## Layout
 
