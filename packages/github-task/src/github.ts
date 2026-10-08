@@ -1,5 +1,5 @@
+import type {FunctionTask} from '@buildscaffold/task';
 import {Octokit} from '@octokit/rest';
-import type {Task} from '@buildscaffold/task';
 
 export type Permission = 'pull' | 'triage' | 'push' | 'maintain' | 'admin';
 
@@ -29,41 +29,46 @@ function getClient(): Octokit {
  * @example
  * createRepo('jameslnewell/my-package')
  */
-export function createRepo(repo: string): Task {
-  return async () => {
-    const [owner, name] = split(repo);
-    const octokit = getClient();
+export function createRepo(repo: string): FunctionTask<{repo: string}> {
+  return {
+    type: 'function',
+    label: `create GitHub repo ${repo}`,
+    params: {repo},
+    run: async () => {
+      const [owner, name] = split(repo);
+      const octokit = getClient();
 
-    // octokit throws rather than resolving with a 404 status when the repository doesn't exist
-    try {
-      await octokit.rest.repos.get({owner, repo: name});
-      return;
-    } catch (error) {
-      const isNotFound =
-        typeof error === 'object' &&
-        error !== null &&
-        'status' in error &&
-        error.status === 404;
-      if (!isNotFound) throw error;
-    }
+      // octokit throws rather than resolving with a 404 status when the repository doesn't exist
+      try {
+        await octokit.rest.repos.get({owner, repo: name});
+        return;
+      } catch (error) {
+        const isNotFound =
+          typeof error === 'object' &&
+          error !== null &&
+          'status' in error &&
+          error.status === 404;
+        if (!isNotFound) throw error;
+      }
 
-    const user = await octokit.rest.users.getAuthenticated();
-    // logins are case insensitive
-    if (user.data.login.toLowerCase() === owner.toLowerCase()) {
-      await octokit.rest.repos.createForAuthenticatedUser({name});
-    } else {
-      await octokit.rest.repos.createInOrg({org: owner, name});
-    }
+      const user = await octokit.rest.users.getAuthenticated();
+      // logins are case insensitive
+      if (user.data.login.toLowerCase() === owner.toLowerCase()) {
+        await octokit.rest.repos.createForAuthenticatedUser({name});
+      } else {
+        await octokit.rest.repos.createInOrg({org: owner, name});
+      }
+    },
   };
 }
 
-export interface AddUserToRepoOptions {
+export type AddUserToRepoOptions = {
   /** The repository e.g. `owner/name` */
   repo: string;
   /** The user's login */
   user: string;
   permission: Permission;
-}
+};
 
 /**
  * A task which adds a collaborator to a repository.
@@ -77,25 +82,30 @@ export function addUserToRepo({
   repo,
   user,
   permission,
-}: AddUserToRepoOptions): Task {
-  return async () => {
-    const [owner, name] = split(repo);
-    await getClient().rest.repos.addCollaborator({
-      owner,
-      repo: name,
-      username: user,
-      permission,
-    });
+}: AddUserToRepoOptions): FunctionTask<AddUserToRepoOptions> {
+  return {
+    type: 'function',
+    label: `give ${user} ${permission} access to GitHub repo ${repo}`,
+    params: {repo, user, permission},
+    run: async () => {
+      const [owner, name] = split(repo);
+      await getClient().rest.repos.addCollaborator({
+        owner,
+        repo: name,
+        username: user,
+        permission,
+      });
+    },
   };
 }
 
-export interface AddTeamToRepoOptions {
+export type AddTeamToRepoOptions = {
   /** The repository e.g. `owner/name` */
   repo: string;
   /** The team e.g. `org/team-slug` */
   team: string;
   permission: Permission;
-}
+};
 
 /**
  * A task which gives a team access to a repository.
@@ -109,16 +119,21 @@ export function addTeamToRepo({
   repo,
   team,
   permission,
-}: AddTeamToRepoOptions): Task {
-  return async () => {
-    const [owner, name] = split(repo);
-    const [org, slug] = split(team);
-    await getClient().rest.teams.addOrUpdateRepoPermissionsInOrg({
-      owner,
-      repo: name,
-      org,
-      team_slug: slug,
-      permission,
-    });
+}: AddTeamToRepoOptions): FunctionTask<AddTeamToRepoOptions> {
+  return {
+    type: 'function',
+    label: `give team ${team} ${permission} access to GitHub repo ${repo}`,
+    params: {repo, team, permission},
+    run: async () => {
+      const [owner, name] = split(repo);
+      const [org, slug] = split(team);
+      await getClient().rest.teams.addOrUpdateRepoPermissionsInOrg({
+        owner,
+        repo: name,
+        org,
+        team_slug: slug,
+        permission,
+      });
+    },
   };
 }

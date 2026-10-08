@@ -29,3 +29,5 @@ const tasks = serial([
 - `addTeamToRepo({repo, team, permission})` - give a team, e.g. `org/team-slug`, access to a repository
 
 `permission` is one of `pull`, `triage`, `push`, `maintain` or `admin`.
+
+Each task is a [function task](../task#usage) whose `params` hold its arguments and whose label names them, e.g. `create GitHub repo my-org/my-package`. Neither contains the token.

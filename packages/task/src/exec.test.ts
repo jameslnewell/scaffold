@@ -24,16 +24,24 @@ describe(exec, () => {
     `require('fs').writeFileSync('cwd.txt', process.cwd())`,
   ];
 
+  test('describes the command', () => {
+    expect(exec('npm', ['run', 'build'], {cwd: 'packages/a'})).toMatchObject({
+      type: 'function',
+      label: 'npm run build (in packages/a)',
+      params: {command: 'npm', args: ['run', 'build'], cwd: 'packages/a'},
+    });
+  });
+
   test('runs the command in the scaffolded directory', async () => {
-    await exec(process.execPath, writeCwd)({cwd: dir, diff});
+    await exec(process.execPath, writeCwd).run({directory: dir, diff});
     await expect(fs.readFile(path.join(dir, 'cwd.txt'), 'utf8')).resolves.toBe(
       await fs.realpath(dir),
     );
   });
 
   test('runs the command in a directory relative to the scaffolded directory', async () => {
-    await exec(process.execPath, writeCwd, {cwd: 'nested'})({
-      cwd: dir,
+    await exec(process.execPath, writeCwd, {cwd: 'nested'}).run({
+      directory: dir,
       diff,
     });
     await expect(
@@ -43,8 +51,8 @@ describe(exec, () => {
 
   test('fails when the command exits with a non-zero code', async () => {
     await expect(
-      exec(process.execPath, ['-e', 'process.exit(2)'])({
-        cwd: dir,
+      exec(process.execPath, ['-e', 'process.exit(2)']).run({
+        directory: dir,
         diff,
       }),
     ).rejects.toThrow('exited with code=2');
@@ -52,7 +60,7 @@ describe(exec, () => {
 
   test('fails when the command does not exist', async () => {
     await expect(
-      exec('buildscaffold-missing-command', [])({cwd: dir, diff}),
+      exec('buildscaffold-missing-command', []).run({directory: dir, diff}),
     ).rejects.toThrow('ENOENT');
   });
 });
