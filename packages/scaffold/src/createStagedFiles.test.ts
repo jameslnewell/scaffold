@@ -6,6 +6,7 @@ describe(createStagedFiles, () => {
     test("file does not exist when the file does not already exist on disk", () => {
       const file = "foo/bar";
       const files = createStagedFiles({
+        cwd: process.cwd(),
         host: createInMemoryFiles({ files: {}})
       });
       expect(files.stat(file)).toBeUndefined();
@@ -14,6 +15,7 @@ describe(createStagedFiles, () => {
     test("file exists when the file already exists on disk", () => {
       const file = "foo/bar";
       const files = createStagedFiles({
+        cwd: process.cwd(),
         host: createInMemoryFiles({ files: {[file]: Buffer.from('conent')}})
       });
       expect(files.stat(file)).toEqual({
@@ -25,6 +27,7 @@ describe(createStagedFiles, () => {
     test("file exists when the file does not already exist on disk but it has been created", () => {
       const file = "foo/bar";
       const files = createStagedFiles({
+        cwd: process.cwd(),
         host: createInMemoryFiles({ files: {}})
       });
       files.write(file, Buffer.from("Hello World!"));
@@ -37,6 +40,7 @@ describe(createStagedFiles, () => {
     test("file does not exist when the file already exists on disk but it has been deleted", () => {
       const file = "foo/bar";
       const files = createStagedFiles({
+        cwd: process.cwd(),
         host: createInMemoryFiles({ files: {[file]: Buffer.from('content')}})
       });
       files.delete(file);
@@ -48,6 +52,7 @@ describe(createStagedFiles, () => {
     test("returns undefined when the file does not already exist on disk", () => {
       const file = "foo/bar";
       const files = createStagedFiles({
+        cwd: process.cwd(),
         host: createInMemoryFiles({ files: {}})
       });
       expect(files.read(file)).toBeUndefined();
@@ -57,6 +62,7 @@ describe(createStagedFiles, () => {
       const file = "foo/bar";
       const content = Buffer.from('Hello World!')
       const files = createStagedFiles({
+        cwd: process.cwd(),
         host: createInMemoryFiles({ files: {[file]: content}})
       });
       expect(files.read(file)).toEqual(content);
@@ -66,6 +72,7 @@ describe(createStagedFiles, () => {
       const file = "foo/bar";
       const content = Buffer.from('Hello World!')
       const files = createStagedFiles({
+        cwd: process.cwd(),
         host: createInMemoryFiles({ files: {}})
       });
       files.write(file, content);
@@ -75,6 +82,7 @@ describe(createStagedFiles, () => {
     test("returns undefined when the file already exists on disk but it has been deleted", () => {
       const file = "foo/bar";
       const files = createStagedFiles({
+        cwd: process.cwd(),
         host: createInMemoryFiles({ files: {[file]: Buffer.from('content')}})
       });
       files.delete(file);
@@ -91,6 +99,7 @@ describe(createStagedFiles, () => {
       const file = 'foo/bar'
       const content = Buffer.from('Hello World!')
       const files = createStagedFiles({
+        cwd: process.cwd(),
         host: createInMemoryFiles({ files: {}})
       });
       files.write(file, content)
@@ -102,6 +111,7 @@ describe(createStagedFiles, () => {
       const file = 'foo/bar'
       const content = Buffer.from('Hello World!')
       const files = createStagedFiles({
+        cwd: process.cwd(),
         host: createInMemoryFiles({ files: {[file]: Buffer.from('content')}})
       });
       files.write(file, content)
@@ -112,6 +122,7 @@ describe(createStagedFiles, () => {
     test('file should be deleted when it is written and it already existed', () => {
       const file = 'foo/bar'
       const files = createStagedFiles({
+        cwd: process.cwd(),
         host: createInMemoryFiles({ files: {[file]: Buffer.from('content')}})
       });
       files.delete(file)
@@ -125,7 +136,7 @@ describe(createStagedFiles, () => {
     test('does not write files to disk when no files have changed', () => {
       const hostFiles = createInMemoryFiles({ files: {}})
       const mockWriteFn = jest.spyOn(hostFiles, 'write')
-      const files = createStagedFiles({host: hostFiles})
+      const files = createStagedFiles({cwd: process.cwd(), host: hostFiles})
       files.apply()
       expect(mockWriteFn).not.toBeCalled()
     })
@@ -133,7 +144,7 @@ describe(createStagedFiles, () => {
     test('does not delete files from disk when no files have changed', () => {
       const hostFiles = createInMemoryFiles({ files: {}})
       const mockDeleteFn = jest.spyOn(hostFiles, 'delete')
-      const files = createStagedFiles({host: hostFiles})
+      const files = createStagedFiles({cwd: process.cwd(), host: hostFiles})
       files.apply()
       expect(mockDeleteFn).not.toBeCalled()
     })
@@ -143,10 +154,10 @@ describe(createStagedFiles, () => {
       const content = Buffer.from('Hello World!')
       const hostFiles = createInMemoryFiles({ files: {}})
       const mockWriteFn = jest.spyOn(hostFiles, 'write')
-      const files = createStagedFiles({host: hostFiles})
+      const files = createStagedFiles({cwd: process.cwd(), host: hostFiles})
       files.write(file, content)
       files.apply()
-      expect(mockWriteFn).toBeCalledWith(`${files.cwd}/${file}`, content)
+      expect(mockWriteFn).toBeCalledWith(`${process.cwd()}/${file}`, content)
     })
   
     test('deletes files from disk when files have changed', () => {
@@ -154,11 +165,12 @@ describe(createStagedFiles, () => {
       const hostFiles = createInMemoryFiles({ files: {}})
       const mockDeleteFn = jest.spyOn(hostFiles, 'delete')
       const files = createStagedFiles({
+        cwd: process.cwd(),
         host: hostFiles
       });
       files.delete(file)
       files.apply()
-      expect(mockDeleteFn).toBeCalledWith(`${files.cwd}/${file}`)
+      expect(mockDeleteFn).toBeCalledWith(`${process.cwd()}/${file}`)
     })
   })
   

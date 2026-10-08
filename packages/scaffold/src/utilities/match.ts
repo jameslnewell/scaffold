@@ -22,17 +22,22 @@ export interface MatchFileResult {
   files: string[]
 }
 
+export interface MatchContext {
+  cwd: string
+  files: Files
+}
+
 export function match(source: string, options?: MatchOptions | undefined) {
-  return (files: Files): MatchGlobResult | MatchDirectoryResult | MatchFileResult | undefined => {
+  return ({cwd, files}: MatchContext): MatchGlobResult | MatchDirectoryResult | MatchFileResult | undefined => {
     const glob = pm.scan(source, {})
     if (glob.isGlob) {
       const matcher = pm(source, {
         ...options,
-        cwd: files.cwd, 
+        cwd,
       })
       const matches: string[] = []
       for (const file of files.list(glob.base)) {
-        const relativeFile = path.relative(files.cwd, file)
+        const relativeFile = path.relative(cwd, file)
         if (matcher(relativeFile)) {
           matches.push(file)
         }

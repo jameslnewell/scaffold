@@ -29,8 +29,8 @@ export function copy(
   to: string, 
   options: CopyOptions = {}
 ): Scaffold {
-  return async ({files}) => {
-    const result = match(from, options.globOptions)(files)
+  return async ({cwd, files}) => {
+    const result = match(from, options.globOptions)({cwd, files})
 
     if (!result) throw Error(`Invalid source - not a glob, not a directory, not a file`)
     // TODO: make configurable
@@ -71,8 +71,8 @@ export function move(
   to: string, 
   options: MoveOptions = {}
 ): Scaffold {
-  return async ({files}) => {
-    const result = match(from, options.globOptions)(files)
+  return async ({cwd, files}) => {
+    const result = match(from, options.globOptions)({cwd, files})
 
     if (!result) throw Error(`Invalid source - not a glob, not a directory, not a file`)
     // TODO: make configurable
@@ -114,8 +114,8 @@ export function rm(
   from: string, 
   options: RmOptions = {}
 ): Scaffold {
-  return async ({files}) => {
-    const result = match(from, options.globOptions)(files)
+  return async ({cwd, files}) => {
+    const result = match(from, options.globOptions)({cwd, files})
 
     if (!result) throw Error(`Invalid source - not a glob, not a directory, not a file`)
     // TODO: make configurable
@@ -142,8 +142,8 @@ export function template(
   data: Record<string, any>,
   options: TemplateOptions = {}
 ): Scaffold {
-  return async ({files}) => {
-    const result = match(from, options.globOptions)(files)
+  return async ({cwd, files}) => {
+    const result = match(from, options.globOptions)({cwd, files})
 
     if (!result) throw Error(`Invalid source - not a glob, not a directory, not a file`)
     // TODO: make configurable

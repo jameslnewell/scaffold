@@ -74,7 +74,7 @@ describe(createHostFiles, () => {
         writeFileSync
       }})
       files.write(file, content)
-      expect(writeFileSync).toBeCalledWith(`${files.cwd}/${file}`, content)
+      expect(writeFileSync).toBeCalledWith(`${process.cwd()}/${file}`, content)
     })
   })
 
@@ -86,7 +86,7 @@ describe(createHostFiles, () => {
         rmSync
       }})
       files.delete(file)
-      expect(rmSync).toBeCalledWith(`${files.cwd}/${file}`)
+      expect(rmSync).toBeCalledWith(`${process.cwd()}/${file}`)
     })
 
     test('throws when the file does not exist', () => {
