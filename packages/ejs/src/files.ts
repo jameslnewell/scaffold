@@ -1,6 +1,6 @@
 import * as ejs from 'ejs';
 import * as path from 'node:path';
-import {type Content, DiskContent, Files} from '@buildscaffold/core/files';
+import {type Content, Files, isLazyContent} from '@buildscaffold/core/files';
 
 const EXTENSION = '.ejs';
 
@@ -12,11 +12,12 @@ export type TemplateData = Record<string, unknown>;
  * e.g. `package.json.ejs` becomes `package.json`.
  *
  * Values output with `<%= %>` aren't HTML escaped, since templates are usually code and config rather than HTML.
- * Templates loaded from disk can `include()` other templates relative to themselves. Other files are left as they
- * are, so binary files like images can sit alongside templates.
+ * Templates loaded from disk can `include()` other templates relative to themselves, and rendered files keep their
+ * template's mode, so an executable template renders an executable file. Other files are left as they are, so
+ * binary files like images can sit alongside templates.
  *
  * @example
- * const rendered = await template(await fromDisk(`${import.meta.dirname}/templates`), {name: 'my-package'});
+ * const rendered = await template(await fromDisk(new URL('../templates', import.meta.url)), {name: 'my-package'});
  */
 export async function template(
   files: Files,
@@ -30,26 +31,37 @@ export async function template(
       continue;
     }
 
-    const rendered = file.slice(0, -EXTENSION.length);
-    if (files.has(rendered)) {
+    const output = file.slice(0, -EXTENSION.length);
+    if (files.has(output)) {
       throw new Error(
-        `Template "${file}" would replace "${rendered}", which is also in the tree`,
+        `Template "${file}" would replace "${output}", which is also in the tree`,
       );
     }
 
-    const bytes =
-      content instanceof Uint8Array ? content : await content.read();
+    const source = isLazyContent(content) ? await content.read() : content;
     let text: string;
     try {
-      text = ejs.render(new TextDecoder().decode(bytes), data, {
+      text = ejs.render(new TextDecoder().decode(source), data, {
         // lets include() resolve relative to the template on disk
-        filename: content instanceof DiskContent ? content.path : file,
+        filename: (isLazyContent(content) ? content.path : undefined) ?? file,
         escape: String,
       });
     } catch (cause) {
       throw new Error(`Template "${file}" failed to render`, {cause});
     }
-    entries.push([rendered, new TextEncoder().encode(text)]);
+    const bytes = new TextEncoder().encode(text);
+    const mode = isLazyContent(content)
+      ? (await content.stat()).mode
+      : undefined;
+    entries.push([
+      output,
+      mode === undefined
+        ? bytes
+        : {
+            read: () => Promise.resolve(bytes),
+            stat: () => Promise.resolve({size: bytes.byteLength, mode}),
+          },
+    ]);
   }
   return new Files(entries);
 }
