@@ -9,6 +9,6 @@ export const prompts = {
 
 export const factory: ScaffoldFactory<ScaffoldOptions<typeof prompts>> = ({name}) => {
   return async ({files}) => {
-    files.write('greeting.txt', `Hello ${name}!`)
+    files.write('greeting.txt', Buffer.from(`Hello ${name}!`))
   }
 }

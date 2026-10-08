@@ -2,6 +2,7 @@ import { createTasks } from '../createTasks.js'
 import { createInMemoryFiles } from '../createInMemoryFiles.js'
 import { copy, move, rm, template } from './file.js'
 
+const cwd = process.cwd()
 const tasks = createTasks()
 
 describe(copy, () => {
@@ -13,7 +14,7 @@ describe(copy, () => {
       [sourceFile]: content
     }})
 
-    await copy(sourceFile, destinationFile)({files, tasks})
+    await copy(sourceFile, destinationFile)({cwd, files, tasks})
 
     // assert the source file still exists with the original content
     expect(files.read(sourceFile)).toEqual(content)
@@ -30,7 +31,7 @@ describe(copy, () => {
       ['src/hamsters.txt']: content
     }})
     
-    await copy('src', 'dest')({files, tasks})
+    await copy('src', 'dest')({cwd, files, tasks})
 
     // assert the source file still exists with the original content
     expect(files.read('src/cats.txt')).toEqual(content)
@@ -52,7 +53,7 @@ describe(copy, () => {
       ['src/hamsters.txt']: content,
     }})
     
-    await copy('src/*.txt', 'dest')({files, tasks})
+    await copy('src/*.txt', 'dest')({cwd, files, tasks})
 
     // assert the source files still exist with the original content
     expect(files.read('src/cats.txt')).toEqual(content)
@@ -76,7 +77,7 @@ describe(move, () => {
       [source]: content
     }})
 
-    await move(source, destination)({files, tasks})
+    await move(source, destination)({cwd, files, tasks})
 
     // assert the source file no longer exists
     expect(files.read(source)).toBeUndefined()
@@ -93,7 +94,7 @@ describe(move, () => {
       ['src/hamsters.txt']: content
     }})
     
-    await move('src', 'dest')({files, tasks})
+    await move('src', 'dest')({cwd, files, tasks})
 
     // assert the source file no longer exists
     expect(files.read('src/cats.txt')).toBeUndefined()
@@ -115,7 +116,7 @@ describe(move, () => {
       ['src/hamsters.txt']: content,
     }})
     
-    await move('src/*.txt', 'dest')({files, tasks})
+    await move('src/*.txt', 'dest')({cwd, files, tasks})
 
     // assert the source files still exist with the original content
     expect(files.read('src/cats.txt')).toBeUndefined()
@@ -139,7 +140,7 @@ describe(rm, () => {
       [source]: content
     }})
 
-    await rm(source)({files, tasks})
+    await rm(source)({cwd, files, tasks})
 
     // assert the source file no longer exists
     expect(files.read(source)).toBeUndefined()
@@ -154,7 +155,7 @@ describe(rm, () => {
       ['src/hamsters.txt']: content
     }})
     
-    await rm('src')({files, tasks})
+    await rm('src')({cwd, files, tasks})
 
     // assert the source file no longer exists
     expect(files.read('src/cats.txt')).toBeUndefined()
@@ -172,7 +173,7 @@ describe(rm, () => {
       ['src/hamsters.txt']: content,
     }})
     
-    await rm('src/*.txt')({files, tasks})
+    await rm('src/*.txt')({cwd, files, tasks})
 
     // assert the source files still exist with the original content
     expect(files.read('src/cats.txt')).toBeUndefined()
@@ -189,7 +190,7 @@ describe(template, () => {
     const files = createInMemoryFiles({files: {
       'tpl/package.json': Buffer.from('{"name": "<%= name %>"}')
     }})
-    await template('tpl/**/*', 'prj', {name: 'Bob'})({files, tasks})
+    await template('tpl/**/*', 'prj', {name: 'Bob'})({cwd, files, tasks})
     expect(files.read('prj/package.json')).toEqual(Buffer.from('{"name": "Bob"}'))
   })
 
@@ -201,7 +202,7 @@ describe(template, () => {
       [sourceFile]: content
     }})
 
-    await template(sourceFile, destinationFile, {name: 'Bob'})({files, tasks})
+    await template(sourceFile, destinationFile, {name: 'Bob'})({cwd, files, tasks})
 
     // assert the source file still exists with the original content
     expect(files.read(sourceFile)).toEqual(content)
@@ -218,7 +219,7 @@ describe(template, () => {
       ['src/hamsters.txt']: content
     }})
     
-    await template('src', 'dest', {name: 'Bob'})({files, tasks})
+    await template('src', 'dest', {name: 'Bob'})({cwd, files, tasks})
 
     // assert the source file still exists with the original content
     expect(files.read('src/cats.txt')).toEqual(content)
@@ -240,7 +241,7 @@ describe(template, () => {
       ['src/hamsters.txt']: content,
     }})
     
-    await template('src/*.txt', 'dest', {name: 'Bob'})({files, tasks})
+    await template('src/*.txt', 'dest', {name: 'Bob'})({cwd, files, tasks})
 
     // assert the source files still exist with the original content
     expect(files.read('src/cats.txt')).toEqual(content)

@@ -6,13 +6,14 @@ describe(match, () => {
   const directory = '.'
   const fooBarFile = 'foo/bar.txt'
   const barFooFile = 'bar/foo.txt'
+  const cwd = process.cwd()
   const files = createInMemoryFiles({files: {
     [fooBarFile]: Buffer.from('Hello World!'),
     [barFooFile]: Buffer.from('Hello Universe!')
   }})
 
   test('glob match all files', () => {
-    const result = match('**/*')(files) as MatchGlobResult
+    const result = match('**/*')({cwd, files}) as MatchGlobResult
     expect(result).toBeDefined()
     expect(result?.type).toEqual('glob')
     expect(result?.glob).toEqual(expect.objectContaining({}))
@@ -23,7 +24,7 @@ describe(match, () => {
   })
 
   test('glob match not foo files', () => {
-    const result = match('**/*', {ignore: ['foo/**']})(files) as MatchGlobResult
+    const result = match('**/*', {ignore: ['foo/**']})({cwd, files}) as MatchGlobResult
     expect(result).toBeDefined()
     expect(result?.type).toEqual('glob')
     expect(result?.glob).toEqual(expect.objectContaining({}))
@@ -33,7 +34,7 @@ describe(match, () => {
   })
 
   test('file match', () => {
-    const result = match(fooBarFile)(files)
+    const result = match(fooBarFile)({cwd, files})
     expect(result).toBeDefined()
     expect(result?.type).toEqual('file')
     expect(result?.files.map(f => path.relative('.', f))).toEqual([
@@ -42,7 +43,7 @@ describe(match, () => {
   })
 
   test('directory match', () => {
-    const result = match('foo')(files)
+    const result = match('foo')({cwd, files})
     expect(result).toBeDefined()
     expect(result?.type).toEqual('directory')
     expect(result?.files.map(f => path.relative('.', f))).toEqual([
@@ -51,7 +52,7 @@ describe(match, () => {
   })
 
   test('unmatched', () => {
-    const result = match('xxx')(files)
+    const result = match('xxx')({cwd, files})
     expect(result).toBeUndefined()
   })
 

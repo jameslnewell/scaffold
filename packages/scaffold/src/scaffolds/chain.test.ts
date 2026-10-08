@@ -8,8 +8,9 @@ describe(chain, () => {
     const tasks = createTasks()
     const fn1 = jest.fn()
     const fn2 = jest.fn()
-    await chain([fn1, fn2])({files, tasks})
-    expect(fn1).toHaveBeenCalledWith({files, tasks})
-    expect(fn2).toHaveBeenCalledWith({files, tasks})
+    const context = {cwd: process.cwd(), files, tasks}
+    await chain([fn1, fn2])(context)
+    expect(fn1).toHaveBeenCalledWith(context)
+    expect(fn2).toHaveBeenCalledWith(context)
   })
 })
