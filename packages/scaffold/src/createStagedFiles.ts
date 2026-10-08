@@ -65,7 +65,6 @@ export function createStagedFiles({cwd, host}: CreateStagedFilesOptions): Staged
     list(directory) {
       directory = path.resolve(cwd, directory)
       
-      // node@20 doesn't have the recursive flag so we use a stack
       const list = new Set(host.list(directory))
       
       for (const [fileName, fileChange] of Object.entries(changes)) {
