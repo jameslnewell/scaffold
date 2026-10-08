@@ -6,7 +6,7 @@
 >
 > _noun_ — A temporary framework erected to support workers and materials during the construction or repair of a structure.
 
-A CLI and a set of utilities for codifying project boilerplate and generating new codebases from it.
+A CLI and framework for codifying project boilerplate and generating new codebases from it.
 
 ## Scaffolding a project
 

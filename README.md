@@ -6,7 +6,7 @@
 >
 > _noun_ — A temporary framework erected to support workers and materials during the construction or repair of a structure.
 
-_Scaffold_ applies this idea to software. It is a CLI and a set of utilities for codifying project boilerplate and generating new codebases from it. A scaffold provides the initial structure, and the codebase it produces is then maintained independently of it.
+_Scaffold_ applies this idea to software. It is a CLI and framework for codifying project boilerplate and generating new codebases from it. A scaffold provides the initial structure, and the codebase it produces is then maintained independently of it.
 
 ## How it works
 
@@ -27,6 +27,6 @@ A scaffold is an ES module that exports its `prompts` and a `factory` function. 
 
 ## Packages
 
-- [`@jameslnewell/scaffold`](packages/scaffold) - the `scaffold` CLI and utilities for writing scaffolds
+- [`@jameslnewell/scaffold`](packages/scaffold) - the `scaffold` CLI and framework for writing scaffolds
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for developing in this repository.
