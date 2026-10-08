@@ -80,8 +80,8 @@ Packages are published under the `@buildscaffold` scope. When adding one under `
   ```
 - [ ] `vitest.config.mjs` enables the `@buildscaffold/source` condition, so tests import other workspace packages from source (Vitest runs Node tests in Vite's SSR environment, which reads `ssr.resolve.conditions`, and adds its own default conditions to it):
   ```js
-  import config from '@jameslnewell/vitest-config';
   import {defineConfig, mergeConfig} from 'vitest/config';
+  import config from '@jameslnewell/vitest-config';
 
   export default mergeConfig(
     config,
