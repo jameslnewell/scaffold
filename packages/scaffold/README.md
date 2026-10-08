@@ -2,9 +2,9 @@
 
 > **scaffold**
 >
-> _noun_ — A temporary framework erected to support workers and materials during the construction or repair of a structure.
->
 > _verb_ — To erect a scaffold; to provide a supporting framework from which something can be built.
+>
+> _noun_ — A temporary framework erected to support workers and materials during the construction or repair of a structure.
 
 A CLI and a set of utilities for codifying project boilerplate as reusable scaffolds, then using them to generate new codebases.
 
