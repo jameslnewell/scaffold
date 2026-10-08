@@ -1,0 +1,56 @@
+{
+  "name": "@buildscaffold/example-node-package",
+  "version": "0.0.0",
+  "private": true,
+  "description": "An example package of scaffolds for creating and maintaining Node.js packages",
+  "type": "module",
+  "exports": {
+    "./create": {
+      "@buildscaffold/source": "./src/create.ts",
+      "types": "./dist/create.d.ts",
+      "default": "./dist/create.js"
+    },
+    "./add-license": {
+      "@buildscaffold/source": "./src/add-license.ts",
+      "types": "./dist/add-license.d.ts",
+      "default": "./dist/add-license.js"
+    }
+  },
+  "files": [
+    "dist",
+    "templates"
+  ],
+  "dependencies": {
+    "@buildscaffold/core": "workspace:^",
+    "@buildscaffold/ejs": "workspace:^",
+    "@buildscaffold/task": "workspace:^"
+  },
+  "peerDependencies": {
+    "@buildscaffold/cli": "workspace:^"
+  },
+  "devDependencies": {
+    "@buildscaffold/cli": "workspace:*",
+    "@jameslnewell/eslint-config": "^8.0.0",
+    "@jameslnewell/vitest-config": "^8.0.0",
+    "@types/node": "^24.19.1",
+    "@typescript/native": "npm:typescript@^7.0.2",
+    "eslint": "^9.39.5",
+    "typescript": "npm:@typescript/typescript6@^6.0.2",
+    "vite": "^8.3.3",
+    "vitest": "^5.0.3"
+  },
+  "scripts": {
+    "build": "rm -rf ./dist && tsc -p tsconfig.build.json",
+    "check:linting": "eslint .",
+    "check:typing": "tsc",
+    "example:create": "scaffold ./dist/create.js --output-directory ./tmp/my-package --apply --name my-package --author \"James Newell\"",
+    "example:add-license": "scaffold ./dist/add-license.js --output-directory ./tmp/my-package --apply --author \"James Newell\" --license ISC",
+    "example:list": "scaffold @buildscaffold/example-node-package",
+    "fix:linting": "eslint --fix .",
+    "test": "vitest run --project unit"
+  },
+  "engines": {
+    "node": ">=24"
+  },
+  "license": "MIT"
+}
