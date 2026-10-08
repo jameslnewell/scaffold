@@ -1,8 +1,9 @@
 import * as fs from 'node:fs/promises';
 import * as os from 'node:os';
 import * as path from 'node:path';
-import {DiskContent, Files, fromDisk, writeText} from '../files/index.js';
+import {Files, fromDisk, writeText} from '../files/index.js';
 import {afterEach, beforeEach, describe, expect, test, vi} from 'vitest';
+import {DiskContent} from '../files/DiskContent.js';
 import {diff} from './diff.js';
 
 const encode = (text: string): Uint8Array => new TextEncoder().encode(text);
@@ -43,6 +44,30 @@ describe(diff, () => {
     const before = new Files([['a.txt', encode('same')]]);
     const after = writeText(before, 'a.txt', 'same');
     expect((await diff(before, after)).size).toBe(0);
+  });
+
+  test('reports a file whose mode changed as modified', async () => {
+    await fs.writeFile(path.join(dir, 'a.sh'), 'echo a');
+    const before = await fromDisk(dir);
+    const content = before.get('a.sh');
+    if (content === undefined) throw new Error('missing file');
+
+    const changes = await diff(
+      before,
+      before.write('a.sh', content, {mode: 0o755}),
+    );
+
+    expect([...changes.keys()]).toEqual(
+      process.platform === 'win32' ? [] : ['a.sh'],
+    );
+  });
+
+  test('does not report a file written without a mode as modified', async () => {
+    await fs.writeFile(path.join(dir, 'a.sh'), 'echo a');
+    await fs.chmod(path.join(dir, 'a.sh'), 0o755);
+    const before = await fromDisk(dir);
+    const changes = await diff(before, writeText(before, 'a.sh', 'echo a'));
+    expect(changes.size).toBe(0);
   });
 
   test('does not read files whose content is unchanged', async () => {

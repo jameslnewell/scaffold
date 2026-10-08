@@ -1,18 +1,21 @@
 import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
-import type {Content} from '../files/Content.js';
+import {type Content, isLazyContent, modeOf, pathOf} from '../files/Content.js';
 import type {Diff} from './diff.js';
 import {concurrently} from '../files/concurrently.js';
-import {writeEntries} from '../files/writeEntries.js';
 
 /**
- * Write the changes to a directory: create and modify files, and delete files (along with any directories left
- * empty by deleting them).
+ * Write the changes to a directory, creating it if it doesn't exist: create and modify files, and delete files
+ * (along with any directories left empty by deleting them).
  *
- * Files which were loaded from disk and haven't changed are copied natively rather than read into memory.
+ * Files which were loaded from disk are copied natively rather than read into memory. A file with a mode gets
+ * that mode, and a file without one gets the default mode when it's created and keeps its mode when it's modified.
+ *
+ * To write a whole tree to an empty directory, diff it against an empty tree.
  *
  * @example
  * await apply(dir, await diff(before, after));
+ * await apply(emptyDir, await diff(new Files(), files));
  */
 export async function apply(dir: string, diff: Diff): Promise<void> {
   const root = path.resolve(dir);
@@ -35,13 +38,21 @@ export async function apply(dir: string, diff: Diff): Promise<void> {
     await concurrently({
       items: writes.entries(),
       task: async ([index, [file, content]]) => {
-        if (content instanceof Uint8Array) return;
-        const relative = path.relative(
-          realRoot,
-          await fs.realpath(content.path),
-        );
-        const source = relative.split(path.sep).join('/');
-        if (diff.has(source)) writes[index] = [file, await content.read()];
+        const source = pathOf(content);
+        if (source === undefined || !isLazyContent(content)) return;
+        const relative = path.relative(realRoot, await fs.realpath(source));
+        if (!diff.has(relative.split(path.sep).join('/'))) return;
+        const bytes = await content.read();
+        const mode = await modeOf(content);
+        writes[index] = [
+          file,
+          mode === undefined
+            ? bytes
+            : {
+                read: () => Promise.resolve(bytes),
+                stat: () => Promise.resolve({size: bytes.byteLength, mode}),
+              },
+        ];
       },
     });
   }
@@ -55,9 +66,45 @@ export async function apply(dir: string, diff: Diff): Promise<void> {
   });
   await removeEmptyDirectories({root, files: deletes});
 
-  await writeEntries({dir: root, entries: writes});
-}
+  const directories = new Set(
+    writes.map(([file]) => path.dirname(path.join(root, file))),
+  );
+  await concurrently({
+    items: directories,
+    task: async (directory) => {
+      await fs.mkdir(directory, {recursive: true});
+    },
+  });
 
+  await concurrently({
+    items: writes,
+    task: async ([file, content]) => {
+      const destination = path.join(root, file);
+      const source = pathOf(content);
+      const mode = await modeOf(content);
+      if (source !== undefined) {
+        // copyFile() also copies the source's mode, so the existing mode is restored for content without one
+        const previousMode =
+          mode === undefined ? await modeIfExists(destination) : undefined;
+        // copies natively (or clones where the filesystem supports it) so the bytes never pass through JS
+        await fs.copyFile(source, destination, fs.constants.COPYFILE_FICLONE);
+        if (previousMode !== undefined && process.platform !== 'win32') {
+          await fs.chmod(destination, previousMode);
+        }
+      } else {
+        await fs.writeFile(
+          destination,
+          isLazyContent(content) ? await content.read() : content,
+        );
+      }
+      // the mode may differ from the source's, and writeFile() doesn't change the mode of an existing file.
+      // Windows only has a read-only flag, so modes aren't applied there.
+      if (mode !== undefined && process.platform !== 'win32') {
+        await fs.chmod(destination, mode);
+      }
+    },
+  });
+}
 interface RemoveEmptyDirectoriesOptions {
   root: string;
   files: string[];
@@ -107,5 +154,13 @@ async function realpathIfExists(file: string): Promise<string | undefined> {
       return undefined;
     }
     throw error;
+  }
+}
+
+async function modeIfExists(file: string): Promise<number | undefined> {
+  try {
+    return (await fs.stat(file)).mode;
+  } catch {
+    return undefined;
   }
 }

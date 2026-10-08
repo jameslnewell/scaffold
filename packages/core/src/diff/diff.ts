@@ -1,5 +1,11 @@
 import * as fs from 'node:fs/promises';
-import {type Content, DiskContent} from '../files/Content.js';
+import {
+  type Content,
+  isLazyContent,
+  modeOf,
+  pathOf,
+  sizeOf,
+} from '../files/Content.js';
 import type {Files} from '../files/Files.js';
 import {concurrently} from '../files/concurrently.js';
 
@@ -15,7 +21,7 @@ export type Change =
  * The changes between two trees, keyed by path and sorted by path.
  *
  * @example
- * if (diff.has('package.json')) await npm.install()(ctx);
+ * if (changes.has('package.json')) console.log('package.json changed');
  */
 export type Diff = ReadonlyMap<string, Change>;
 
@@ -23,7 +29,8 @@ export type Diff = ReadonlyMap<string, Change>;
  * Compare two trees, typically the tree loaded from disk and the tree a scaffold produced.
  *
  * Files only in `after` are created, files only in `before` are deleted, and files in both are modified when
- * their contents differ. Files whose content is still the same object as in `before` are unchanged without being
+ * their contents or modes differ. A file without a mode keeps the mode it has, so isn't modified by its mode. Modes
+ * are ignored on Windows. Files whose content is still the same object as in `before` are unchanged without being
  * read, so only the files a scaffold replaced are compared.
  *
  * @example
@@ -52,7 +59,10 @@ export async function diff(before: Files, after: Files): Promise<Diff> {
     task: async ([file, content]) => {
       const previous = before.get(file);
       if (previous === undefined) return;
-      if (!(await isSameContent(previous, content))) {
+      const isSame =
+        (await isSameMode(previous, content)) &&
+        (await isSameContent(previous, content));
+      if (!isSame) {
         changes.set(file, {type: 'modify', content});
       }
     },
@@ -61,24 +71,24 @@ export async function diff(before: Files, after: Files): Promise<Diff> {
   return new Map([...changes].sort(([a], [b]) => (a < b ? -1 : 1)));
 }
 
-async function sizeOf(content: Content): Promise<number> {
-  if (content instanceof Uint8Array) return content.byteLength;
-  return (await content.stat()).size;
+async function isSameMode(before: Content, after: Content): Promise<boolean> {
+  // modes aren't applied on Windows, which only has a read-only flag, so they can't differ there
+  if (process.platform === 'win32') return true;
+  const mode = await modeOf(after);
+  if (mode === undefined) return true;
+  const previous = await modeOf(before);
+  if (previous === undefined) return true;
+  return (mode & 0o7777) === (previous & 0o7777);
 }
 
 async function isSameContent(a: Content, b: Content): Promise<boolean> {
-  if (
-    a instanceof DiskContent &&
-    b instanceof DiskContent &&
-    a.path === b.path
-  ) {
-    return true;
-  }
+  const pathA = pathOf(a);
+  if (pathA !== undefined && pathA === pathOf(b)) return true;
 
   const size = await sizeOf(a);
   if (size !== (await sizeOf(b))) return false;
 
-  if (a instanceof Uint8Array && b instanceof Uint8Array) {
+  if (!isLazyContent(a) && !isLazyContent(b)) {
     return Buffer.from(a.buffer, a.byteOffset, a.byteLength).equals(b);
   }
 
@@ -109,19 +119,21 @@ interface ChunkReader {
 }
 
 async function openChunkReader(content: Content): Promise<ChunkReader> {
-  if (content instanceof Uint8Array) {
-    const bytes = Buffer.from(
-      content.buffer,
-      content.byteOffset,
-      content.byteLength,
+  const file = pathOf(content);
+  if (file === undefined) {
+    const bytes = isLazyContent(content) ? await content.read() : content;
+    const buffer = Buffer.from(
+      bytes.buffer,
+      bytes.byteOffset,
+      bytes.byteLength,
     );
     return {
       read: (offset, length) =>
-        Promise.resolve(bytes.subarray(offset, offset + length)),
+        Promise.resolve(buffer.subarray(offset, offset + length)),
       close: () => Promise.resolve(),
     };
   }
-  const handle = await fs.open(content.path);
+  const handle = await fs.open(file);
   return {
     read: async (offset, length) => {
       const chunk = Buffer.alloc(length);

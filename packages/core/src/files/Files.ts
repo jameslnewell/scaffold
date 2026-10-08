@@ -1,5 +1,5 @@
 import * as path from 'node:path';
-import type {Content} from './Content.js';
+import {type Content, isLazyContent, withMode} from './Content.js';
 
 function normalize(file: string): string {
   if (path.posix.isAbsolute(file) || path.win32.isAbsolute(file)) {
@@ -13,6 +13,11 @@ function normalize(file: string): string {
     throw new Error(`Expected a path to a file but received "${file}"`);
   }
   return normalized;
+}
+
+export interface WriteOptions {
+  /** The file mode e.g. `0o755` for an executable */
+  mode?: number | undefined;
 }
 
 /**
@@ -54,14 +59,20 @@ export class Files implements Iterable<[string, Content]> {
   /** The bytes of the file at the path, or `undefined` when there is no file */
   async read(file: string): Promise<Uint8Array | undefined> {
     const content = this.get(file);
-    if (content instanceof Uint8Array || content === undefined) return content;
+    if (content === undefined || !isLazyContent(content)) return content;
     return content.read();
   }
 
-  /** A new tree with the file at the path replaced */
-  write(file: string, content: Content): Files {
+  /**
+   * A new tree with the file at the path replaced. A file written without a `mode` gets the default mode when it's
+   * created, and keeps its mode when it already exists on disk.
+   */
+  write(file: string, content: Content, {mode}: WriteOptions = {}): Files {
     const entries = new Map(this.#entries);
-    entries.set(normalize(file), content);
+    entries.set(
+      normalize(file),
+      mode === undefined ? content : withMode(content, mode),
+    );
     return Files.#from(entries);
   }
 

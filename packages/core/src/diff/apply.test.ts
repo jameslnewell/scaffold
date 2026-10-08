@@ -1,8 +1,9 @@
 import * as fs from 'node:fs/promises';
 import * as os from 'node:os';
 import * as path from 'node:path';
-import {DiskContent, fromDisk, writeText} from '../files/index.js';
+import {Files, fromDisk, writeText} from '../files/index.js';
 import {afterEach, beforeEach, describe, expect, test, vi} from 'vitest';
+import {DiskContent} from '../files/DiskContent.js';
 import {apply} from './apply.js';
 import {diff} from './diff.js';
 
@@ -42,6 +43,74 @@ describe(apply, () => {
     // the directory is removed too, since it was left empty
     await expect(fs.stat(path.join(dir, 'deleted'))).rejects.toThrow();
   });
+
+  test('writes a tree to an empty directory', async () => {
+    const destination = path.join(dir, 'new');
+    const files = writeText(new Files(), 'a/b.txt', 'b');
+    await apply(destination, await diff(new Files(), files));
+    await expect(
+      fs.readFile(path.join(destination, 'a/b.txt'), 'utf8'),
+    ).resolves.toBe('b');
+  });
+
+  test.skipIf(process.platform === 'win32')(
+    'keeps the mode of files copied from disk',
+    async () => {
+      await write('template/bin/run.sh', 'echo run');
+      await fs.chmod(path.join(dir, 'template/bin/run.sh'), 0o755);
+      const destination = path.join(dir, 'destination');
+
+      await apply(
+        destination,
+        await diff(new Files(), await fromDisk(path.join(dir, 'template'))),
+      );
+
+      const {mode} = await fs.stat(path.join(destination, 'bin/run.sh'));
+      expect(mode & 0o777).toBe(0o755);
+    },
+  );
+
+  test.skipIf(process.platform === 'win32')(
+    'sets the mode of files written with a mode, and keeps the mode of files written without one',
+    async () => {
+      await write('kept.sh', 'echo kept');
+      await fs.chmod(path.join(dir, 'kept.sh'), 0o755);
+      const before = await fromDisk(dir);
+      let after = writeText(before, 'kept.sh', 'echo changed');
+      after = writeText(after, 'created.sh', 'echo created', {mode: 0o700});
+
+      await apply(dir, await diff(before, after));
+
+      expect((await fs.stat(path.join(dir, 'kept.sh'))).mode & 0o777).toBe(
+        0o755,
+      );
+      expect((await fs.stat(path.join(dir, 'created.sh'))).mode & 0o777).toBe(
+        0o700,
+      );
+    },
+  );
+
+  test.skipIf(process.platform === 'win32')(
+    'keeps the mode of a file overwritten with copied content which has no mode',
+    async () => {
+      await write('source.txt', 'source');
+      await write('kept.sh', 'echo kept');
+      await fs.chmod(path.join(dir, 'kept.sh'), 0o755);
+      const before = await fromDisk(dir);
+      const after = before.write('kept.sh', {
+        read: () => Promise.resolve(new Uint8Array()),
+        stat: () => Promise.resolve({size: 6}),
+        path: path.join(dir, 'source.txt'),
+      });
+
+      await apply(dir, await diff(before, after));
+
+      await expect(read('kept.sh')).resolves.toBe('source');
+      expect((await fs.stat(path.join(dir, 'kept.sh'))).mode & 0o777).toBe(
+        0o755,
+      );
+    },
+  );
 
   test('swaps two files within the directory', async () => {
     await write('a.txt', 'a');

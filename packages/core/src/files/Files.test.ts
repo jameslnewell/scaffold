@@ -37,6 +37,11 @@ describe(Files, () => {
     expect(files.get('b.txt')).toBe(content);
   });
 
+  test('writing with a mode keeps the content', async () => {
+    const files = new Files().write('a.sh', content, {mode: 0o755});
+    await expect(files.read('a.sh')).resolves.toBe(content);
+  });
+
   test('reading a missing file returns undefined', async () => {
     await expect(new Files().read('missing.txt')).resolves.toBeUndefined();
   });

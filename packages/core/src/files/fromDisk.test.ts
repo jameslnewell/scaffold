@@ -2,8 +2,9 @@ import * as fs from 'node:fs/promises';
 import * as os from 'node:os';
 import * as path from 'node:path';
 import {afterEach, beforeEach, describe, expect, test, vi} from 'vitest';
-import {DiskContent} from './Content.js';
+import {DiskContent} from './DiskContent.js';
 import {fromDisk} from './fromDisk.js';
+import {pathToFileURL} from 'node:url';
 import {readText} from './text.js';
 
 describe(fromDisk, () => {
@@ -63,6 +64,11 @@ describe(fromDisk, () => {
       'packages/a/node_modules/pkg/index.js',
       'src/index.ts',
     ]);
+  });
+
+  test('loads a directory given as a URL', async () => {
+    const files = await fromDisk(pathToFileURL(dir), {glob: 'README.md'});
+    expect(files.paths()).toEqual(['README.md']);
   });
 
   test('loads a directory which does not exist as an empty tree', async () => {

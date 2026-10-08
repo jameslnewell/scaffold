@@ -1,7 +1,8 @@
 import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
-import {DiskContent} from './Content.js';
+import {DiskContent} from './DiskContent.js';
 import {Files} from './Files.js';
+import {fileURLToPath} from 'node:url';
 import {matchesGlob} from './matchesGlob.js';
 
 const DEFAULT_IGNORE = ['**/.git/**', '**/node_modules/**'];
@@ -14,23 +15,23 @@ export interface FromDiskOptions {
 }
 
 /**
- * Load a tree from a directory on disk, keyed by paths relative to the directory.
+ * Load a tree from a directory on disk, given as a path or a `URL`, keyed by paths relative to the directory.
  *
- * Paths are listed straight away, but contents are only read when they're needed. Dotfiles are loaded, and `*` and
+ * Paths are listed straight away, but contents (and modes) are only read when they're needed. Dotfiles are loaded, and `*` and
  * `**` in `glob` and `ignore` match them. Symbolic links are skipped, and a directory which doesn't exist loads as
  * an empty tree.
  *
  * @example
- * const templates = await fromDisk(`${import.meta.dirname}/templates`);
+ * const templates = await fromDisk(new URL('../templates', import.meta.url));
  * const destination = await fromDisk(process.cwd(), {
  *   ignore: ['**\/.git/**', '**\/node_modules/**', 'dist/**'],
  * });
  */
 export async function fromDisk(
-  dir: string,
+  dir: string | URL,
   {glob, ignore = DEFAULT_IGNORE}: FromDiskOptions = {},
 ): Promise<Files> {
-  const root = path.resolve(dir);
+  const root = path.resolve(dir instanceof URL ? fileURLToPath(dir) : dir);
   const isIgnored = (file: string): boolean =>
     ignore.some((pattern) => matchesGlob(file, pattern));
 
