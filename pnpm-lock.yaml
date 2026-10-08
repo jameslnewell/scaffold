@@ -164,7 +164,17 @@ settings:
 
 importers:
 
-  .: {}
+  .:
+    devDependencies:
+      '@jameslnewell/editor-config':
+        specifier: ^7.0.0
+        version: 7.0.0
+      '@jameslnewell/prettier-config':
+        specifier: ^7.0.0
+        version: 7.0.0(prettier@3.9.9)
+      prettier:
+        specifier: ^3.9.9
+        version: 3.9.9
 
   packages/scaffold:
     dependencies:
@@ -362,11 +372,19 @@ packages:
     resolution: {integrity: sha512-XvJRx+2KR3YXyYtPUUy+qd9i7p+GO9Ko6VIIpWlBrpWwXDv8WLFeHTxz35CfQFUiBMLXlGHhGzys7lqit9gWag==}
     engines: {node: '>=18'}
 
+  '@jameslnewell/editor-config@7.0.0':
+    resolution: {integrity: sha512-HFNjCV14AWYjIW8I9a/V/GNt5QV+RW5GX+ZLQXNjbyaPfrtuGU6tvxSEw1cW1pLSP/QKm46341RRZdQDyfM8rw==}
+
   '@jameslnewell/eslint-config@7.0.0':
     resolution: {integrity: sha512-RTYeXNzVsx/bohJVdmHFrN7SwsTER+G68eexHAxBsMhZCIpMPtSEBr+D5GzkYsHFyPvyuZ53fHP+csf9t6sAxQ==}
     peerDependencies:
       eslint: ^9.33.0
       typescript: '>=4.8.4 <6.1.0'
+
+  '@jameslnewell/prettier-config@7.0.0':
+    resolution: {integrity: sha512-hY43RSqoXilbHvj79UV33/VBbk1Y3iKL2TkeTIHjUf4whmnBiyBTUpbDd2I0tPNeWZ+hoIyJ7csBl5fbaGr+eg==}
+    peerDependencies:
+      prettier: ^3.0.0
 
   '@jameslnewell/typescript-config@7.0.0':
     resolution: {integrity: sha512-sVyeRa8yAYxLU7pNFzLL5e6jmyuH9esCKNjiLIaOrQFNvgsv47S3dkMtvtwouray79iDWVotz2EYT+H/OQ36bg==}
@@ -1804,6 +1822,11 @@ packages:
     resolution: {integrity: sha512-vkcDPrRZo1QZLbn5RLGPpg/WmIQ65qoWWhcGKf/b5eplkkarX0m9z8ppCat4mlOqUsWpyNuYgO3VRyrYHSzX5g==}
     engines: {node: '>= 0.8.0'}
 
+  prettier@3.9.9:
+    resolution: {integrity: sha512-Z/CJHIkdujO/OtN7nXUii0Rf3VT5SRuhjBA82Xvu2XhBUgX3nhP67T0LHceBdQLex7OOFGTox+Q5Yg8Jk2Qivg==}
+    engines: {node: '>=14'}
+    hasBin: true
+
   punycode@2.3.1:
     resolution: {integrity: sha512-vYt7UD1U9Wg6138shLtLOvdAu+8DsC/ilFtEVHcH+wydcSpNE20AfSOduf6MkRFahL5FY7X1oU7nKVZFtfq8Fg==}
     engines: {node: '>=6'}
@@ -2365,6 +2388,8 @@ snapshots:
     dependencies:
       mute-stream: 1.0.0
 
+  '@jameslnewell/editor-config@7.0.0': {}
+
   '@jameslnewell/eslint-config@7.0.0(@typescript-eslint/parser@8.71.1(@typescript/typescript6@6.0.2)(eslint@9.39.5(supports-color@7.2.0))(supports-color@7.2.0))(@typescript/typescript6@6.0.2)(eslint@9.39.5(supports-color@7.2.0))(supports-color@7.2.0)(vitest@5.0.3(@types/node@24.19.1)(vite@8.3.3(@types/node@24.19.1)))':
     dependencies:
       '@eslint/js': 9.39.5
@@ -2384,6 +2409,10 @@ snapshots:
       - eslint-plugin-import-x
       - supports-color
       - vitest
+
+  '@jameslnewell/prettier-config@7.0.0(prettier@3.9.9)':
+    dependencies:
+      prettier: 3.9.9
 
   '@jameslnewell/typescript-config@7.0.0(@typescript/typescript6@6.0.2)':
     dependencies:
@@ -3772,6 +3801,8 @@ snapshots:
       source-map-js: 1.2.2
 
   prelude-ls@1.2.1: {}
+
+  prettier@3.9.9: {}
 
   punycode@2.3.1: {}
 

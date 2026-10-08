@@ -10,6 +10,13 @@ Use the Node.js version in `.nvmrc` (e.g. via `nvm use`) and the pnpm version pi
 pnpm install
 ```
 
+## Formatting
+
+```console
+pnpm run check:formatting
+pnpm run fix:formatting
+```
+
 ## Linting
 
 ```console
@@ -20,11 +27,13 @@ pnpm run fix:linting
 ## Testing
 
 Unit testing (all packages):
+
 ```console
 pnpm run test
 ```
 
 Manual testing:
+
 ```console
 cd packages/scaffold
 pnpm run build

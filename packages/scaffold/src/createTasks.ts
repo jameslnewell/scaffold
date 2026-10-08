@@ -1,16 +1,14 @@
-import type { Task, Tasks } from "./types.js";
+import type {Task, Tasks} from './types.js';
 
 export function createTasks(): Tasks {
-  const tasks: Task[] = []
+  const tasks: Task[] = [];
   return {
-
     queue(task) {
-      tasks.push(task)
+      tasks.push(task);
     },
 
     [Symbol.iterator]() {
-      return tasks[Symbol.iterator]()
-    }
-
-  }
+      return tasks[Symbol.iterator]();
+    },
+  };
 }

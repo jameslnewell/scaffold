@@ -4,9 +4,17 @@
   "packageManager": "pnpm@12.8.1",
   "scripts": {
     "build": "pnpm -r run build",
+    "check:formatting": "prettier --check .",
     "check:linting": "pnpm -r run check:linting",
     "check:typing": "pnpm -r run check:typing",
+    "fix:formatting": "prettier --write .",
     "fix:linting": "pnpm -r run fix:linting",
     "test": "pnpm -r run test"
-  }
+  },
+  "devDependencies": {
+    "@jameslnewell/editor-config": "^7.0.0",
+    "@jameslnewell/prettier-config": "^7.0.0",
+    "prettier": "^3.9.9"
+  },
+  "prettier": "@jameslnewell/prettier-config"
 }

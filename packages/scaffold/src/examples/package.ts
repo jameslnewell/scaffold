@@ -1,14 +1,20 @@
-import type { ScaffoldFactory, ScaffoldOptions, ScaffoldPrompts } from "../types.js"
+import type {
+  ScaffoldFactory,
+  ScaffoldOptions,
+  ScaffoldPrompts,
+} from '../types.js';
 
 export const prompts = {
   name: {
     type: 'string',
-    description: 'The name of a person or animal to greet'
+    description: 'The name of a person or animal to greet',
   },
-} satisfies ScaffoldPrompts
+} satisfies ScaffoldPrompts;
 
-export const factory: ScaffoldFactory<ScaffoldOptions<typeof prompts>> = ({name}) => {
+export const factory: ScaffoldFactory<ScaffoldOptions<typeof prompts>> = ({
+  name,
+}) => {
   return ({files}) => {
-    files.write('greeting.txt', Buffer.from(`Hello ${name}!`))
-  }
-}
+    files.write('greeting.txt', Buffer.from(`Hello ${name}!`));
+  };
+};

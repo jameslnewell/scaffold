@@ -1,67 +1,71 @@
-import * as path from 'node:path'
-import type { Files } from '../types.js'
-import pm from 'picomatch'
+import * as path from 'node:path';
+import type {Files} from '../types.js';
+import pm from 'picomatch';
 
 export interface MatchOptions {
-  ignore?: string[] | undefined
+  ignore?: string[] | undefined;
 }
 
 export interface MatchGlobResult {
-  type: 'glob'
-  glob: ReturnType<typeof pm.scan>
-  files: string[]
+  type: 'glob';
+  glob: ReturnType<typeof pm.scan>;
+  files: string[];
 }
 
 export interface MatchDirectoryResult {
-  type: 'directory'
-  files: string[]
+  type: 'directory';
+  files: string[];
 }
 
 export interface MatchFileResult {
-  type: 'file'
-  files: string[]
+  type: 'file';
+  files: string[];
 }
 
 export interface MatchContext {
-  cwd: string
-  files: Files
+  cwd: string;
+  files: Files;
 }
 
-export function match(source: string, options?: MatchOptions  ) {
-  return ({cwd, files}: MatchContext): MatchGlobResult | MatchDirectoryResult | MatchFileResult | undefined => {
-    const glob = pm.scan(source, {})
+export function match(source: string, options?: MatchOptions) {
+  return ({
+    cwd,
+    files,
+  }: MatchContext):
+    MatchGlobResult | MatchDirectoryResult | MatchFileResult | undefined => {
+    const glob = pm.scan(source, {});
     if (glob.isGlob) {
       const matcher = pm(source, {
         ...options,
         cwd,
-      })
-      const matches: string[] = []
+      });
+      const matches: string[] = [];
       for (const file of files.list(glob.base)) {
-        const relativeFile = path.relative(cwd, file)
+        const relativeFile = path.relative(cwd, file);
         if (matcher(relativeFile)) {
-          matches.push(file)
+          matches.push(file);
         }
       }
       return {
         type: 'glob',
         glob,
-        files: matches
-      }
+        files: matches,
+      };
     } else {
-      const stat = files.stat(source)
+      const stat = files.stat(source);
       if (stat?.isDirectory) {
         return {
           type: 'directory',
-          files: files.list(source)
-        }
+          files: files.list(source),
+        };
       } else if (stat?.isFile) {
         return {
           type: 'file',
-          files: [source]
-        }
+          files: [source],
+        };
       } else {
-        return undefined
+        return undefined;
       }
     }
-  }
+  };
 }
