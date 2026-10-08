@@ -1,5 +1,5 @@
 {
-  "extends": "@jameslnewell/typescript-config",
+  "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "noEmit": true,
     "types": ["node"]
