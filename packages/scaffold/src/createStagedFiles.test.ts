@@ -151,7 +151,7 @@ describe(createStagedFiles, () => {
       const mockWriteFn = vi.spyOn(hostFiles, 'write')
       const files = createStagedFiles({cwd: process.cwd(), host: hostFiles})
       files.apply()
-      expect(mockWriteFn).not.toBeCalled()
+      expect(mockWriteFn).not.toHaveBeenCalled()
     })
   
     test('does not delete files from disk when no files have changed', () => {
@@ -159,7 +159,7 @@ describe(createStagedFiles, () => {
       const mockDeleteFn = vi.spyOn(hostFiles, 'delete')
       const files = createStagedFiles({cwd: process.cwd(), host: hostFiles})
       files.apply()
-      expect(mockDeleteFn).not.toBeCalled()
+      expect(mockDeleteFn).not.toHaveBeenCalled()
     })
   
     test('writes files to disk when files have changed', () => {
@@ -170,7 +170,7 @@ describe(createStagedFiles, () => {
       const files = createStagedFiles({cwd: process.cwd(), host: hostFiles})
       files.write(file, content)
       files.apply()
-      expect(mockWriteFn).toBeCalledWith(`${process.cwd()}/${file}`, content)
+      expect(mockWriteFn).toHaveBeenCalledWith(`${process.cwd()}/${file}`, content)
     })
   
     test('deletes files from disk when files have changed', () => {
@@ -183,7 +183,7 @@ describe(createStagedFiles, () => {
       });
       files.delete(file)
       files.apply()
-      expect(mockDeleteFn).toBeCalledWith(`${process.cwd()}/${file}`)
+      expect(mockDeleteFn).toHaveBeenCalledWith(`${process.cwd()}/${file}`)
     })
   })
   

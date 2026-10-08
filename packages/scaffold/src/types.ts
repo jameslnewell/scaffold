@@ -33,10 +33,10 @@ export interface ScaffoldContext {
 }
 
 export interface Scaffold {
-  (context: ScaffoldContext): Promise<void>
+  (context: ScaffoldContext): void | Promise<void>
 }
 
-export interface ScaffoldFactory<Options extends {} = {}> {
+export interface ScaffoldFactory<Options extends object = ScaffoldOptions<ScaffoldPrompts>> {
   (options: Options): Scaffold
 }
 

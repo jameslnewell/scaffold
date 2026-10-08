@@ -1,13 +1,14 @@
 import {Octokit} from '@octokit/rest'
+import type { Task } from "../types.js"
 
 type Permission = 'pull' | 'triage' | 'push' | 'maintain' | 'admin'
 
 function split(name: string): [string, string] {
-  const [owner, repository] = name.split('/')
-  if (!owner || !repository) throw new Error(`Expected a repository name like "owner/repository" but received "${name}".`)
+  const [owner, rest] = name.split('/')
+  if (!owner || !rest) throw new Error(`Expected a name like "owner/name" but received "${name}".`)
   return [
     owner,
-    repository
+    rest
   ]
 }
 
@@ -25,19 +26,22 @@ function createClient(): Octokit {
 }
 
 // TODO: option to error if already exists
-interface CreateRepoOptions {
-}
-
 /**
  * @param repo The repository e.g. jameslnewell/repository
  */
-export function createRepo(repo: string, _options: CreateRepoOptions = {}) {
+export function createRepo(repo: string): Task {
   return async () => {
     const [owner, repository] = split(repo)
     const octokit = createClient()
-    
-    const exists = await octokit.repos.get({owner: owner, repo: repository})
-    if (exists.status === 200) return
+
+    // octokit throws rather than resolving with a 404 status when the repository doesn't exist
+    try {
+      await octokit.repos.get({owner: owner, repo: repository})
+      return
+    } catch (error) {
+      const isNotFound = typeof error === 'object' && error !== null && 'status' in error && error.status === 404
+      if (!isNotFound) throw error
+    }
 
     const user = await octokit.users.getAuthenticated()
     if (user.data.login === owner) {
@@ -59,7 +63,7 @@ interface AddUserToRepoOptions {
   permission: Permission 
 }
 
-export function addUserToRepo({repo, user, permission}: AddUserToRepoOptions) {
+export function addUserToRepo({repo, user, permission}: AddUserToRepoOptions): Task {
   return async () => {
     const [owner, repository] = split(repo)
     const octokit = createClient()
@@ -78,16 +82,16 @@ interface AddTeamToRepoOptions {
   permission: Permission 
 }
 
-export function addTeamToRepo({repo, team, permission}: AddTeamToRepoOptions) {
+export function addTeamToRepo({repo, team, permission}: AddTeamToRepoOptions): Task {
   return async () => {
-    const [owner, _repo] = split(repo)
-    const [org, _team] = split(team)
+    const [owner, repository] = split(repo)
+    const [org, teamSlug] = split(team)
     const octokit = createClient()
     await octokit.rest.teams.addOrUpdateRepoPermissionsInOrg({
       owner: owner, 
-      repo: repo,
+      repo: repository,
       org: org, 
-      team_slug: _team,
+      team_slug: teamSlug,
       permission
     })
   }

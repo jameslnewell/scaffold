@@ -1,6 +1,6 @@
+import * as path from 'node:path'
 import {describe, expect, test} from 'vitest'
 import {createInMemoryFiles} from './createInMemoryFiles.js'
-import * as path from 'node:path'
 
 describe(createInMemoryFiles, () => {
 

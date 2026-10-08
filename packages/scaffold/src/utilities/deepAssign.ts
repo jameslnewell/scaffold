@@ -1,4 +1,4 @@
 
-export function deepAssign(a: any, b: any): any {
+export function deepAssign(a: unknown, b: unknown): unknown {
   return Object.assign({}, b, a)
 }

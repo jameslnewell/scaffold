@@ -8,7 +8,7 @@ const minimumNodeMajorVersion = 24
 const nodeMajorVersion = Number(process.versions.node.split('.')[0])
 
 if (nodeMajorVersion < minimumNodeMajorVersion) {
-  console.error(`💥 scaffold requires Node.js ${minimumNodeMajorVersion} or later, but is running on Node.js ${process.version}.`)
+  console.error(`💥 scaffold requires Node.js ${String(minimumNodeMajorVersion)} or later, but is running on Node.js ${process.version}.`)
   process.exitCode = 1
 } else {
   await import('./main.js')

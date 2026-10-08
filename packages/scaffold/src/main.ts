@@ -1,14 +1,14 @@
-import yargs from 'yargs';
-import { hideBin } from "yargs/helpers";
+import type { Scaffold } from './types.js';
 import confirm from '@inquirer/confirm'
-import { printDiff } from './printDiff.js';
-import { printOptions } from './printOptions.js';
-import { loadScaffoldFromModule } from './loadScaffoldFromModule.js';
-import { extractOptionsFromYargsArgv } from './extractOptionsFromYargsArgv.js';
+import { createHostFiles } from './createHostFiles.js';
 import { createStagedFiles } from './createStagedFiles.js';
 import { createTasks } from './createTasks.js';
-import type { Scaffold } from './types.js';
-import { createHostFiles } from './createHostFiles.js';
+import { extractOptionsFromYargsArgv } from './extractOptionsFromYargsArgv.js';
+import { hideBin } from "yargs/helpers";
+import { loadScaffoldFromModule } from './loadScaffoldFromModule.js';
+import { printDiff } from './printDiff.js';
+import { printOptions } from './printOptions.js';
+import yargs from 'yargs';
 
 interface ScaffoldCommandArgv {
   module: string
@@ -16,19 +16,20 @@ interface ScaffoldCommandArgv {
   apply?: boolean | undefined
 }
 
-async function main() {
+async function main(): Promise<void> {
   await yargs(hideBin(process.argv))
     .strict()
     .scriptName('scaffold')
     .hide('help')
     .hide('version')
-    .fail((message, error, parser) => {
+    // yargs types the error as always present, but it is undefined for validation failures
+    .fail((message, error: Error | undefined, parser) => {
       parser.showHelp()
       console.log('')
       if (message) {
         console.log(`💥 ${message}`)
       } else {
-        console.log(`💥 ${error?.message}`)
+        console.log(`💥 ${error?.message ?? 'An unknown error occurred'}`)
       }
       process.exit(1)
     })
@@ -99,7 +100,7 @@ async function main() {
           const diff = files.diff()
           printDiff(diff)
   
-          const hasChanges = Object.keys(diff)
+          const hasChanges = Object.keys(diff).length > 0
           if (!hasChanges) {
             console.log(`There are no changes to apply.`)
             console.log('')

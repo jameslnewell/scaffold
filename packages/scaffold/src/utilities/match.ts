@@ -1,6 +1,6 @@
 import * as path from 'node:path'
-import pm from 'picomatch'
 import type { Files } from '../types.js'
+import pm from 'picomatch'
 
 export interface MatchOptions {
   ignore?: string[] | undefined
@@ -27,7 +27,7 @@ export interface MatchContext {
   files: Files
 }
 
-export function match(source: string, options?: MatchOptions | undefined) {
+export function match(source: string, options?: MatchOptions  ) {
   return ({cwd, files}: MatchContext): MatchGlobResult | MatchDirectoryResult | MatchFileResult | undefined => {
     const glob = pm.scan(source, {})
     if (glob.isGlob) {

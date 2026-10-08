@@ -17,6 +17,7 @@ This is a pnpm workspace with a single package, [`packages/scaffold`](packages/s
 Run from the repository root:
 
 - `pnpm install`
+- `pnpm run check:linting` (`pnpm run fix:linting` to fix)
 - `pnpm run check:typing`
 - `pnpm run test`
 - `pnpm run build`

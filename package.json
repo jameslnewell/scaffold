@@ -4,7 +4,9 @@
   "packageManager": "pnpm@12.8.1",
   "scripts": {
     "build": "pnpm -r run build",
+    "check:linting": "pnpm -r run check:linting",
     "check:typing": "pnpm -r run check:typing",
+    "fix:linting": "pnpm -r run fix:linting",
     "test": "pnpm -r run test"
   }
 }

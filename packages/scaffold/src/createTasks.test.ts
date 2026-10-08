@@ -1,4 +1,5 @@
 import {describe, expect, test} from 'vitest'
+import type { Task } from "./types.js";
 import { createTasks } from "./createTasks.js";
 
 describe(createTasks, () => {
@@ -8,8 +9,8 @@ describe(createTasks, () => {
   })
 
   test('iterates items in queued order', () => {
-    const taskA = async () => {}
-    const taskB = async () => {}
+    const taskA: Task = async () => {}
+    const taskB: Task = async () => {}
     const tasks = createTasks()
     tasks.queue(taskA)
     tasks.queue(taskB)

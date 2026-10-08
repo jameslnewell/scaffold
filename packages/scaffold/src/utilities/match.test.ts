@@ -1,7 +1,7 @@
+import * as path from 'path'
+import {type MatchGlobResult, match} from './match.js'
 import {describe, expect, test} from 'vitest'
 import { createInMemoryFiles } from '../createInMemoryFiles.js'
-import {type MatchGlobResult, match} from './match.js'
-import * as path from 'path'
 
 describe(match, () => {
   const fooBarFile = 'foo/bar.txt'
@@ -15,9 +15,9 @@ describe(match, () => {
   test('glob match all files', () => {
     const result = match('**/*')({cwd, files}) as MatchGlobResult
     expect(result).toBeDefined()
-    expect(result?.type).toEqual('glob')
-    expect(result?.glob).toEqual(expect.objectContaining({}))
-    expect(result?.files.map(f => path.relative('.', f))).toEqual([
+    expect(result.type).toEqual('glob')
+    expect(result.glob).toEqual(expect.objectContaining({}))
+    expect(result.files.map(f => path.relative('.', f))).toEqual([
       barFooFile,
       fooBarFile,
     ])
@@ -26,9 +26,9 @@ describe(match, () => {
   test('glob match not foo files', () => {
     const result = match('**/*', {ignore: ['foo/**']})({cwd, files}) as MatchGlobResult
     expect(result).toBeDefined()
-    expect(result?.type).toEqual('glob')
-    expect(result?.glob).toEqual(expect.objectContaining({}))
-    expect(result?.files.map(f => path.relative('.', f))).toEqual([
+    expect(result.type).toEqual('glob')
+    expect(result.glob).toEqual(expect.objectContaining({}))
+    expect(result.files.map(f => path.relative('.', f))).toEqual([
       barFooFile
     ])
   })

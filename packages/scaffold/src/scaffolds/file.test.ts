@@ -1,7 +1,7 @@
-import {describe, expect, test} from 'vitest'
-import { createTasks } from '../createTasks.js'
-import { createInMemoryFiles } from '../createInMemoryFiles.js'
 import { copy, move, rm, template } from './file.js'
+import {describe, expect, test} from 'vitest'
+import { createInMemoryFiles } from '../createInMemoryFiles.js'
+import { createTasks } from '../createTasks.js'
 
 const cwd = process.cwd()
 const tasks = createTasks()
