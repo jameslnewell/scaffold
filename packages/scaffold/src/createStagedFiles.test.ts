@@ -47,6 +47,18 @@ describe(createStagedFiles, () => {
       files.delete(file);
       expect(files.stat(file)).toBeUndefined();
     });
+
+    test("directory exists when the directory does not already exist on disk but a file has been created within it", () => {
+      const files = createStagedFiles({
+        cwd: process.cwd(),
+        host: createInMemoryFiles({ files: {}})
+      });
+      files.write("foo/bar", Buffer.from("Hello World!"));
+      expect(files.stat("foo")).toEqual({
+        isFile: false,
+        isDirectory: true
+      });
+    });
   });
 
   describe('.read()', () => {

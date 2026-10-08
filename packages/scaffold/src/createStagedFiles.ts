@@ -34,7 +34,7 @@ export function createStagedFiles({cwd, host}: CreateStagedFilesOptions): Staged
           isFile: true,
           isDirectory: false
         }
-      } else if (Object.entries(changes).filter(([f, change]) => change.type !== 'DELETE').find(([f, change]) => {f.startsWith(`${file}/`)})) {
+      } else if (Object.entries(changes).filter(([f, change]) => change.type !== 'DELETE').find(([f, change]) => f.startsWith(`${file}${path.sep}`))) {
         return {
           isFile: false,
           isDirectory: true
@@ -73,7 +73,7 @@ export function createStagedFiles({cwd, host}: CreateStagedFilesOptions): Staged
           // remove files from the list which have been deleted
           list.delete(fileName)
         } else {
-          if (fileName.startsWith(`${directory}/`)) {
+          if (fileName.startsWith(`${directory}${path.sep}`)) {
             // if the added file is within the directory being listed then add it to the list of files
             list.add(fileName)
           }
