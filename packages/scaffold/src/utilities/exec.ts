@@ -1,4 +1,6 @@
-import { spawn } from "node:child_process"
+// node's spawn can't run commands like npm on Windows, which are .cmd shims requiring a shell, whereas
+// cross-spawn resolves them and safely escapes their arguments
+import spawn from "cross-spawn"
 
 export interface ExecOptions {
   cwd?: string | undefined
@@ -20,8 +22,8 @@ export function exec(cmd: string, args: string[], {cwd}: ExecOptions = {}) {
       reject(error)
     })
 
-    child.stdout.pipe(process.stdout)
-    child.stderr.pipe(process.stderr)
+    child.stdout?.pipe(process.stdout)
+    child.stderr?.pipe(process.stderr)
 
   })
 }

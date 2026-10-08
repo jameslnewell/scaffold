@@ -177,6 +177,9 @@ importers:
       '@octokit/rest':
         specifier: ^20.1.1
         version: 20.1.2
+      cross-spawn:
+        specifier: ^7.0.6
+        version: 7.0.6
       ejs:
         specifier: ^3.1.10
         version: 3.1.10
@@ -202,6 +205,9 @@ importers:
       '@swc/jest':
         specifier: ^0.2.36
         version: 0.2.39(@swc/core@1.16.13)
+      '@types/cross-spawn':
+        specifier: ^6.0.6
+        version: 6.0.6
       '@types/ejs':
         specifier: ^3.1.5
         version: 3.1.5
@@ -888,6 +894,9 @@ packages:
 
   '@types/cacheable-request@6.0.3':
     resolution: {integrity: sha512-IQ3EbTzGxIigb1I3qPZc1rWJnH0BmSKv5QYTalEwweFvyBDLSAe24zP0le/hyi7ecGfZVlIVAg4BZqb8WBwKqw==}
+
+  '@types/cross-spawn@6.0.6':
+    resolution: {integrity: sha512-fXRhhUkG4H3TQk5dBhQ7m/JDdSNHKwR2BBia62lhwEIq9xGiQKLxd6LymNhn47SjXhsUEPmxi+PKw2OkW4LLjA==}
 
   '@types/ejs@3.1.5':
     resolution: {integrity: sha512-nv+GSx77ZtXiJzwKdsASqi+YQ5Z7vwHsTP0JY2SiQgjGckkBRKZnk8nIM+7oUZ1VCtuTz0+By4qVR7fqzp/Dfg==}
@@ -2950,6 +2959,10 @@ snapshots:
       '@types/keyv': 3.1.4
       '@types/node': 20.19.43
       '@types/responselike': 1.0.3
+
+  '@types/cross-spawn@6.0.6':
+    dependencies:
+      '@types/node': 24.19.1
 
   '@types/ejs@3.1.5': {}
 
