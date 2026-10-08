@@ -71,31 +71,12 @@ Packages are published under the `@buildscaffold` scope. When adding one under `
     ```
   - the `devDependencies` those scripts use, with the same specifiers as [`packages/scaffold/package.json`](packages/scaffold/package.json): `@jameslnewell/eslint-config`, `@jameslnewell/vitest-config`, `@types/node`, `eslint`, `vite`, `vitest`, and the two aliased TypeScript versions (`"@typescript/native": "npm:typescript@…"` provides `tsc`, and `"typescript": "npm:@typescript/typescript6@…"` is used by `typescript-eslint`)
 - [ ] `tsconfig.json` extends `../../tsconfig.base.json`, which enables the `@buildscaffold/source` condition, and `tsconfig.build.json` extends `tsconfig.json`
-- [ ] `eslint.config.mjs` resolves imports with the `@buildscaffold/source` condition, so `import/no-unresolved` doesn't need other packages to be built:
+- [ ] `eslint.config.mjs` uses the shared config. It needs no settings for the `@buildscaffold/source` condition, because `tsc` checks the imports in `src`:
   ```js
   import {defineConfig, globalIgnores} from 'eslint/config';
   import config from '@jameslnewell/eslint-config/node';
 
-  export default defineConfig([
-    globalIgnores(['dist']),
-    config,
-    {
-      settings: {
-        'import/resolver': {
-          typescript: {
-            conditionNames: [
-              '@buildscaffold/source',
-              'types',
-              'import',
-              'require',
-              'node',
-              'default',
-            ],
-          },
-        },
-      },
-    },
-  ]);
+  export default defineConfig([globalIgnores(['dist']), config]);
   ```
 - [ ] `vitest.config.mjs` enables the `@buildscaffold/source` condition, so tests import other workspace packages from source (Vitest runs Node tests in Vite's SSR environment, which reads `ssr.resolve.conditions`, and adds its own default conditions to it):
   ```js
