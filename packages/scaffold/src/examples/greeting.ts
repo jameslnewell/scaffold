@@ -1,4 +1,4 @@
-import { ScaffoldFactory, ScaffoldOptions, ScaffoldPrompts } from '../types.js'
+import type { ScaffoldFactory, ScaffoldOptions, ScaffoldPrompts } from '../types.js'
 import { serial } from '../tasks/serial.js'
 import * as npm from '../tasks/npm.js'
 import * as git from '../tasks/git.js'

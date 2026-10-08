@@ -1,4 +1,4 @@
-import { ScaffoldFactory, ScaffoldOptions, ScaffoldPrompts } from "../types.js"
+import type { ScaffoldFactory, ScaffoldOptions, ScaffoldPrompts } from "../types.js"
 
 export const prompts = {
   name: {

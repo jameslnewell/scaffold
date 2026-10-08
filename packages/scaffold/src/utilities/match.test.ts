@@ -1,9 +1,9 @@
+import {describe, expect, test} from 'vitest'
 import { createInMemoryFiles } from '../createInMemoryFiles.js'
-import {MatchGlobResult, match} from './match.js'
+import {type MatchGlobResult, match} from './match.js'
 import * as path from 'path'
 
 describe(match, () => {
-  const directory = '.'
   const fooBarFile = 'foo/bar.txt'
   const barFooFile = 'bar/foo.txt'
   const cwd = process.cwd()

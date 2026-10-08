@@ -1,4 +1,4 @@
-import { ScaffoldPrompts, ScaffoldFactory } from "./types.js"
+import type { ScaffoldFactory, ScaffoldPrompts } from "./types.js"
 import * as path from 'node:path'
 import { pathToFileURL } from 'node:url'
 import { resolve } from 'import-meta-resolve'

@@ -1,4 +1,4 @@
-import { Scaffold } from "../types.js";
+import type { Scaffold } from "../types.js";
 import { deepAssign } from "../utilities/deepAssign.js";
 
 interface MergeOptions {

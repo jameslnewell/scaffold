@@ -7,13 +7,13 @@ import { loadScaffoldFromModule } from './loadScaffoldFromModule.js';
 import { extractOptionsFromYargsArgv } from './extractOptionsFromYargsArgv.js';
 import { createStagedFiles } from './createStagedFiles.js';
 import { createTasks } from './createTasks.js';
-import { Scaffold } from './types.js';
+import type { Scaffold } from './types.js';
 import { createHostFiles } from './createHostFiles.js';
 
 interface ScaffoldCommandArgv {
   module: string
-  cwd?: string
-  apply?: boolean
+  cwd?: string | undefined
+  apply?: boolean | undefined
 }
 
 async function main() {

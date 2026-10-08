@@ -1,6 +1,6 @@
 import * as path from "node:path";
 import * as ejs from 'ejs'
-import { Files, Scaffold } from "../types.js";
+import type { Scaffold } from "../types.js";
 import { match } from "../utilities/match.js";
 
 function rename(sourceDir: string, destDir: string): (file: string) => string {

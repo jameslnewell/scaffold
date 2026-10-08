@@ -1,5 +1,5 @@
 import * as yargs from 'yargs'
-import { ScaffoldPrompts, ScaffoldOptions } from './types.js'
+import type { ScaffoldPrompts } from './types.js'
 
 /**
  * Convert prompts to yargs options

@@ -1,4 +1,4 @@
-import { StagedFilesystemDiff } from "./createStagedFiles.js"
+import type { StagedFilesystemDiff } from "./createStagedFiles.js"
 
 export function printDiff(diff: StagedFilesystemDiff) {
   console.log('diff:')

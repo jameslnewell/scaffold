@@ -1,6 +1,6 @@
 import * as path from 'node:path'
 import pm from 'picomatch'
-import { Files } from '../types.js'
+import type { Files } from '../types.js'
 
 export interface MatchOptions {
   ignore?: string[] | undefined

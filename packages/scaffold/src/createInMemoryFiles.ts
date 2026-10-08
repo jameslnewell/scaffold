@@ -1,5 +1,5 @@
 import * as path from 'node:path'
-import { Files } from './types.js'
+import type { Files } from './types.js'
 
 export interface CreateInMemoryFilesOptions {
   cwd?: string | undefined

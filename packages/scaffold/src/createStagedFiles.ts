@@ -1,5 +1,5 @@
 import * as path from 'node:path'
-import { Files } from './types.js'
+import type { Files } from './types.js'
 
 type FilePath = string
 
@@ -34,7 +34,7 @@ export function createStagedFiles({cwd, host}: CreateStagedFilesOptions): Staged
           isFile: true,
           isDirectory: false
         }
-      } else if (Object.entries(changes).filter(([f, change]) => change.type !== 'DELETE').find(([f, change]) => f.startsWith(`${file}${path.sep}`))) {
+      } else if (Object.entries(changes).filter(([, change]) => change.type !== 'DELETE').find(([f]) => f.startsWith(`${file}${path.sep}`))) {
         return {
           isFile: false,
           isDirectory: true

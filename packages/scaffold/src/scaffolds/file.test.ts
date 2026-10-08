@@ -1,3 +1,4 @@
+import {describe, expect, test} from 'vitest'
 import { createTasks } from '../createTasks.js'
 import { createInMemoryFiles } from '../createInMemoryFiles.js'
 import { copy, move, rm, template } from './file.js'

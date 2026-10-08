@@ -4,6 +4,7 @@ type Permission = 'pull' | 'triage' | 'push' | 'maintain' | 'admin'
 
 function split(name: string): [string, string] {
   const [owner, repository] = name.split('/')
+  if (!owner || !repository) throw new Error(`Expected a repository name like "owner/repository" but received "${name}".`)
   return [
     owner,
     repository
@@ -30,7 +31,7 @@ interface CreateRepoOptions {
 /**
  * @param repo The repository e.g. jameslnewell/repository
  */
-export function createRepo(repo: string, options: CreateRepoOptions = {}) {
+export function createRepo(repo: string, _options: CreateRepoOptions = {}) {
   return async () => {
     const [owner, repository] = split(repo)
     const octokit = createClient()

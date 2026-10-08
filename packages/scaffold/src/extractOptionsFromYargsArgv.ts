@@ -1,8 +1,8 @@
 import yargs from 'yargs';
 import { convertPromptsToYargsOptions } from './convertPromptsToYargsOptions.js';
-import { ScaffoldOptions, ScaffoldPrompts } from './types.js';
+import type { ScaffoldOptions, ScaffoldPrompts } from './types.js';
 
-export async function extractOptionsFromYargsArgv(prompts: ScaffoldPrompts, argv: string[]): Promise<{error?: string; options: ScaffoldOptions<{}>}> {
+export async function extractOptionsFromYargsArgv(prompts: ScaffoldPrompts, argv: string[]): Promise<{error?: string | undefined; options: ScaffoldOptions<{}>}> {
   const parser = yargs(argv)
     .strict()
     .hide('help')

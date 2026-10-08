@@ -1,11 +1,8 @@
 {
+  "extends": "@jameslnewell/typescript-config",
   "compilerOptions": {
     "noEmit": true,
-    "esModuleInterop": true,
-    "strict": true,
-    "target": "ESNext",
-    "module": "NodeNext",
-    "moduleResolution": "NodeNext",
+    "types": ["node"]
   },
   "include": ["src"]
 }
