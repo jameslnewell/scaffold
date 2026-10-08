@@ -1,7 +1,7 @@
 
 // =============== CORE ===============
 
-interface Stats {
+export interface Stats {
   isFile: boolean
   isDirectory: boolean
 }
@@ -14,7 +14,7 @@ export interface Files {
   list(directory: string): string[]
 }
 
-interface TaskContext {
+export interface TaskContext {
   cwd: string
 }
 

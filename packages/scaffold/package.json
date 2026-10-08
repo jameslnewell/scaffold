@@ -57,7 +57,7 @@
   },
   "scripts": {
     "check:typing": "tsc",
-    "build": "pnpm run build:js && pnpm run build:types && chmod +x ./dist/cli.js",
+    "build": "rm -rf ./dist && pnpm run build:js && pnpm run build:types && chmod +x ./dist/cli.js",
     "build:js": "swc ./src --strip-leading-paths --out-dir ./dist --ignore '**/*.test.ts'",
     "build:types": "tsc -p tsconfig.build.json",
     "develop": "pnpm run build:js --watch",
