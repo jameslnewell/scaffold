@@ -1,0 +1,41 @@
+{
+  "name": "@buildscaffold/task",
+  "version": "0.0.0",
+  "description": "Run side effects like npm install and git init after a scaffold's changes are applied",
+  "type": "module",
+  "exports": {
+    ".": {
+      "@buildscaffold/source": "./src/index.ts",
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "peerDependencies": {
+    "@buildscaffold/core": "workspace:^"
+  },
+  "devDependencies": {
+    "@buildscaffold/core": "workspace:*",
+    "@jameslnewell/eslint-config": "^8.0.0",
+    "@jameslnewell/vitest-config": "^8.0.0",
+    "@types/node": "^24.19.1",
+    "@typescript/native": "npm:typescript@^7.0.2",
+    "eslint": "^9.39.5",
+    "typescript": "npm:@typescript/typescript6@^6.0.2",
+    "vite": "^8.3.3",
+    "vitest": "^5.0.3"
+  },
+  "scripts": {
+    "build": "rm -rf ./dist && tsc -p tsconfig.build.json",
+    "check:linting": "eslint .",
+    "check:typing": "tsc",
+    "fix:linting": "eslint --fix .",
+    "test": "vitest run --project unit"
+  },
+  "engines": {
+    "node": ">=24"
+  },
+  "license": "MIT"
+}

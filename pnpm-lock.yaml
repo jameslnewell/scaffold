@@ -243,6 +243,43 @@ importers:
         specifier: ^5.0.3
         version: 5.0.3(@types/node@24.19.1)(vite@8.3.3(@types/node@24.19.1))
 
+  packages/github-task:
+    dependencies:
+      '@octokit/rest':
+        specifier: ^20.1.1
+        version: 20.1.2
+    devDependencies:
+      '@buildscaffold/core':
+        specifier: workspace:*
+        version: link:../core
+      '@buildscaffold/task':
+        specifier: workspace:*
+        version: link:../task
+      '@jameslnewell/eslint-config':
+        specifier: ^8.0.0
+        version: 8.0.0(@typescript-eslint/parser@8.71.1(@typescript/typescript6@6.0.2)(eslint@9.39.5(supports-color@7.2.0))(supports-color@7.2.0))(@typescript/typescript6@6.0.2)(eslint@9.39.5(supports-color@7.2.0))(supports-color@7.2.0)(vitest@5.0.3(@types/node@24.19.1)(vite@8.3.3(@types/node@24.19.1)))
+      '@jameslnewell/vitest-config':
+        specifier: ^8.0.0
+        version: 8.0.0(vitest@5.0.3(@types/node@24.19.1)(vite@8.3.3(@types/node@24.19.1)))
+      '@types/node':
+        specifier: ^24.19.1
+        version: 24.19.1
+      '@typescript/native':
+        specifier: npm:typescript@^7.0.2
+        version: typescript@7.0.2
+      eslint:
+        specifier: ^9.39.5
+        version: 9.39.5(supports-color@7.2.0)
+      typescript:
+        specifier: npm:@typescript/typescript6@^6.0.2
+        version: '@typescript/typescript6@6.0.2'
+      vite:
+        specifier: ^8.3.3
+        version: 8.3.3(@types/node@24.19.1)
+      vitest:
+        specifier: ^5.0.3
+        version: 5.0.3(@types/node@24.19.1)(vite@8.3.3(@types/node@24.19.1))
+
   packages/scaffold:
     dependencies:
       '@inquirer/confirm':
@@ -291,6 +328,36 @@ importers:
       '@types/yargs':
         specifier: ^17.0.35
         version: 17.0.35
+      '@typescript/native':
+        specifier: npm:typescript@^7.0.2
+        version: typescript@7.0.2
+      eslint:
+        specifier: ^9.39.5
+        version: 9.39.5(supports-color@7.2.0)
+      typescript:
+        specifier: npm:@typescript/typescript6@^6.0.2
+        version: '@typescript/typescript6@6.0.2'
+      vite:
+        specifier: ^8.3.3
+        version: 8.3.3(@types/node@24.19.1)
+      vitest:
+        specifier: ^5.0.3
+        version: 5.0.3(@types/node@24.19.1)(vite@8.3.3(@types/node@24.19.1))
+
+  packages/task:
+    devDependencies:
+      '@buildscaffold/core':
+        specifier: workspace:*
+        version: link:../core
+      '@jameslnewell/eslint-config':
+        specifier: ^8.0.0
+        version: 8.0.0(@typescript-eslint/parser@8.71.1(@typescript/typescript6@6.0.2)(eslint@9.39.5(supports-color@7.2.0))(supports-color@7.2.0))(@typescript/typescript6@6.0.2)(eslint@9.39.5(supports-color@7.2.0))(supports-color@7.2.0)(vitest@5.0.3(@types/node@24.19.1)(vite@8.3.3(@types/node@24.19.1)))
+      '@jameslnewell/vitest-config':
+        specifier: ^8.0.0
+        version: 8.0.0(vitest@5.0.3(@types/node@24.19.1)(vite@8.3.3(@types/node@24.19.1)))
+      '@types/node':
+        specifier: ^24.19.1
+        version: 24.19.1
       '@typescript/native':
         specifier: npm:typescript@^7.0.2
         version: typescript@7.0.2
