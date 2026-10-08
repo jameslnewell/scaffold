@@ -1,4 +1,4 @@
-import {describe, expectTypeOf, test} from 'vitest';
+import {describe, expect, expectTypeOf, test} from 'vitest';
 import {defineScaffold} from './define.js';
 
 describe(defineScaffold, () => {
@@ -36,5 +36,25 @@ describe(defineScaffold, () => {
         return (files) => files;
       },
     });
+  });
+
+  test('passes the options and directory to the tasks factory', () => {
+    defineScaffold({
+      options: {name: {type: 'string', description: 'Name'}},
+      scaffold: () => (files) => files,
+      tasks: (ctx) => {
+        expectTypeOf(ctx.options.name).toBeString();
+        expectTypeOf(ctx.directory).toBeString();
+        return {type: 'serial', tasks: []};
+      },
+    });
+  });
+
+  test('marks the module without adding an enumerable property', () => {
+    const module = defineScaffold({scaffold: () => (files) => files});
+    expect(Object.keys(module)).toEqual(['scaffold']);
+    expect(
+      Object.getOwnPropertySymbols(module).map((symbol) => symbol.description),
+    ).toEqual(['@buildscaffold/cli/scaffold-module']);
   });
 });

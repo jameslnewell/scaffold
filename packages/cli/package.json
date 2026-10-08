@@ -25,11 +25,6 @@
     "@buildscaffold/core": "workspace:^",
     "@buildscaffold/task": "workspace:^"
   },
-  "peerDependenciesMeta": {
-    "@buildscaffold/task": {
-      "optional": true
-    }
-  },
   "devDependencies": {
     "@buildscaffold/core": "workspace:*",
     "@buildscaffold/task": "workspace:*",
