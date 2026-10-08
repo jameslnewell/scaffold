@@ -30,7 +30,6 @@
   },
   "devDependencies": {
     "@jameslnewell/eslint-config": "^7.0.0",
-    "@jameslnewell/typescript-config": "^7.0.0",
     "@jameslnewell/vitest-config": "^7.0.0",
     "@types/cross-spawn": "^6.0.6",
     "@types/ejs": "^3.1.5",

@@ -14,6 +14,7 @@
   "devDependencies": {
     "@jameslnewell/editor-config": "^7.0.0",
     "@jameslnewell/prettier-config": "^7.0.0",
+    "@jameslnewell/typescript-config": "^7.0.0",
     "prettier": "^3.9.9"
   },
   "prettier": "@jameslnewell/prettier-config"

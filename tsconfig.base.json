@@ -1,0 +1,6 @@
+{
+  "extends": "@jameslnewell/typescript-config",
+  "compilerOptions": {
+    "customConditions": ["@buildscaffold/source"]
+  }
+}
