@@ -23,3 +23,5 @@ cd packages/scaffold
 pnpm run build
 pnpm run example:greeting
 ```
+
+The greeting example writes files, runs `npm install` and initialises a git repository in `packages/scaffold/tmp/greeting` which is git ignored.
