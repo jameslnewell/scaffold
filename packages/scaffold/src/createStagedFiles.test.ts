@@ -1,3 +1,4 @@
+import { jest } from '@jest/globals'
 import { createInMemoryFiles } from "./createInMemoryFiles.js";
 import { createStagedFiles } from "./createStagedFiles.js";
 

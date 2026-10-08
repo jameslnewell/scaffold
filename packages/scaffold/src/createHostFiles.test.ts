@@ -1,37 +1,32 @@
+import { jest } from '@jest/globals'
+import * as fs from 'node:fs'
+import * as os from 'node:os'
+import * as path from 'node:path'
 import { createHostFiles } from "./createHostFiles.js";
 
 describe(createHostFiles, () => {
+  // stat() and read() run against a real directory because node's overloaded fs signatures can't be stubbed type-safely
+  let cwd: string
+  beforeEach(() => {
+    cwd = fs.mkdtempSync(path.join(os.tmpdir(), 'scaffold-'))
+    fs.mkdirSync(path.join(cwd, 'foo'))
+    fs.writeFileSync(path.join(cwd, 'foo/bar'), 'Hello World!')
+  })
+  afterEach(() => {
+    fs.rmSync(cwd, {recursive: true, force: true})
+  })
+
   describe('.stat()', () => {
     test('isFile=true when the file exists', () => {
-      const file = 'foo/bar'
-      const files = createHostFiles({fs: {
-        statSync: jest.fn().mockReturnValue({
-          isFile() {
-            return true
-          },
-          isDirectory() {
-            return false
-          }
-        })
-      }})
-      expect(files.stat(file)).toEqual({
+      const files = createHostFiles({cwd})
+      expect(files.stat('foo/bar')).toEqual({
         isFile: true,
         isDirectory: false
       })
     })
 
-    test('isDirectory=true when the file does not exist', () => {
-      const file = 'foo/bar'
-      const files = createHostFiles({fs: {
-        statSync: jest.fn().mockReturnValue({
-          isFile() {
-            return false
-          },
-          isDirectory() {
-            return true
-          }
-        })
-      }})
+    test('isDirectory=true when the path is a directory', () => {
+      const files = createHostFiles({cwd})
       expect(files.stat('foo')).toEqual({
         isFile: false,
         isDirectory: true
@@ -39,29 +34,20 @@ describe(createHostFiles, () => {
     })
 
     test('returns undefined when a path does not exist', () => {
-      const files = createHostFiles({fs: {
-        statSync: jest.fn().mockReturnValue(undefined)
-      }})
-      expect(files.stat('foo/bar')).toBeUndefined()
+      const files = createHostFiles({cwd})
+      expect(files.stat('foo/baz')).toBeUndefined()
     })
   })
 
   describe('.read()', () => {
-    test('returns a string when the file exists', () => {
-      const file = 'foo/bar'
-      const content = Buffer.from('Hello World!')
-      const files = createHostFiles({fs: {
-        readFileSync: jest.fn().mockReturnValue(Buffer.from(content))
-      }})
-      expect(files.read(file)).toEqual(content)
+    test('returns the content when the file exists', () => {
+      const files = createHostFiles({cwd})
+      expect(files.read('foo/bar')).toEqual(Buffer.from('Hello World!'))
     })
 
-    test('returns undefiend when the file does not exist', () => {
-      const file = 'foo/bar'
-      const files = createHostFiles({fs: {
-        readFileSync: jest.fn(() => {throw {code: 'ENOENT'}})
-      }})
-      expect(files.read(file)).toBeUndefined()
+    test('returns undefined when the file does not exist', () => {
+      const files = createHostFiles({cwd})
+      expect(files.read('foo/baz')).toBeUndefined()
     })
   })
 
