@@ -1,6 +1,10 @@
+import * as fs from 'node:fs/promises';
+import * as os from 'node:os';
+import * as path from 'node:path';
 import {Files, readText, writeText} from '../files/index.js';
 import {describe, expect, test} from 'vitest';
 import {merge} from './merge.js';
+import {pathToFileURL} from 'node:url';
 
 describe(merge, () => {
   const destination = writeText(
@@ -31,5 +35,19 @@ describe(merge, () => {
   test('overlays the tree into a directory', async () => {
     const files = await merge(overlay, {to: 'src'})(destination);
     expect(files.paths()).toEqual(['a.txt', 'b.txt', 'src/a.txt']);
+  });
+
+  test.each([
+    ['a path', (dir: string): string => dir],
+    ['a URL', (dir: string): URL => pathToFileURL(dir)],
+  ])('overlays the files in a directory given as %s', async (_, toSource) => {
+    const dir = await fs.mkdtemp(path.join(os.tmpdir(), 'buildscaffold-'));
+    try {
+      await fs.writeFile(path.join(dir, 'a.txt'), 'from disk');
+      const files = await merge(toSource(dir))(destination);
+      await expect(readText(files, 'a.txt')).resolves.toBe('from disk');
+    } finally {
+      await fs.rm(dir, {recursive: true, force: true});
+    }
   });
 });

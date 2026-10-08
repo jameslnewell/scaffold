@@ -1,4 +1,4 @@
-import {Files, readText} from '../files/index.js';
+import {Files, isLazyContent, readText} from '../files/index.js';
 import {copy, move, remove, write} from './operations.js';
 import {describe, expect, test} from 'vitest';
 import {pipe} from './pipe.js';
@@ -7,6 +7,15 @@ describe(write, () => {
   test('writes text as UTF-8', async () => {
     const files = await write('a.txt', '☔️')(new Files());
     await expect(readText(files, 'a.txt')).resolves.toBe('☔️');
+  });
+
+  test('writes with a mode', async () => {
+    const files = await write('a.sh', 'echo a', {mode: 0o755})(new Files());
+    const content = files.get('a.sh');
+    if (content === undefined || !isLazyContent(content)) {
+      throw new Error('expected lazy content');
+    }
+    await expect(content.stat()).resolves.toMatchObject({mode: 0o755});
   });
 
   test('writes bytes', async () => {

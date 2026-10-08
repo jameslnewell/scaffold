@@ -4,18 +4,29 @@ import type {Scaffold} from './Scaffold.js';
 /**
  * A scaffold which writes a file, encoding text as UTF-8.
  *
+ * An existing file is replaced. Without a `mode`, a new file gets the default mode and an existing file keeps its
+ * mode.
+ *
  * @example
  * write('greeting.txt', 'Hello!')
+ * write('bin/greet.sh', '#!/bin/sh\necho Hello!\n', {mode: 0o755})
  */
-export function write(file: string, content: string | Uint8Array): Scaffold {
+export function write(
+  file: string,
+  content: string | Uint8Array,
+  options: files.WriteOptions = {},
+): Scaffold {
   return (tree) =>
     typeof content === 'string'
-      ? files.writeText(tree, file, content)
-      : tree.write(file, content);
+      ? files.writeText(tree, file, content, options)
+      : tree.write(file, content, options);
 }
 
 /**
  * A scaffold which copies a file, the files in a directory, or the files matching a glob.
+ *
+ * Files already at the destination are replaced, and the copies keep the sources' modes. Throws when nothing
+ * matches.
  *
  * @see the `copy` operation in `@buildscaffold/core/files`
  * @example
@@ -32,6 +43,9 @@ export function copy(
 /**
  * A scaffold which moves a file, the files in a directory, or the files matching a glob.
  *
+ * Files already at the destination are replaced, and the moved files keep their modes. Throws when nothing
+ * matches.
+ *
  * @see the `move` operation in `@buildscaffold/core/files`
  * @example
  * move('gitignore', '.gitignore')
@@ -45,7 +59,8 @@ export function move(
 }
 
 /**
- * A scaffold which removes a file, the files in a directory, or the files matching a glob.
+ * A scaffold which removes a file, the files in a directory, or the files matching a glob. Throws when nothing
+ * matches.
  *
  * @see the `remove` operation in `@buildscaffold/core/files`
  * @example

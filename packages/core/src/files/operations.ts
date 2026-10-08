@@ -32,8 +32,8 @@ function destinations({files, from, to, options}: DestinationsOptions): Array<{
  * A new tree with a file, the files in a directory, or the files matching a glob copied to another path.
  *
  * A file is copied to the `to` path, while a directory or glob is copied into the `to` directory, keeping paths relative to the directory or to the
- * glob's base e.g. `src/a/b.txt` is copied to `dest/a/b.txt` by `copy(files, 'src/**', 'dest')`. Throws when
- * nothing matches.
+ * glob's base e.g. `src/a/b.txt` is copied to `dest/a/b.txt` by `copy(files, 'src/**', 'dest')`. Files already
+ * at the destination are replaced, and the copies keep the sources' modes. Throws when nothing matches.
  *
  * @example
  * files = copy(files, 'templates/**', '.', {ignore: ['**\/*.md']});
@@ -56,7 +56,8 @@ export type MoveOptions = MatchOptions;
 /**
  * A new tree with a file, the files in a directory, or the files matching a glob moved to another path.
  *
- * Paths are mapped the same way as `copy`. Throws when nothing matches.
+ * Paths are mapped the same way as `copy`. Files already at the destination are replaced, and the moved files keep
+ * their modes. Throws when nothing matches.
  *
  * @example
  * files = move(files, 'gitignore', '.gitignore');
