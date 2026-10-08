@@ -12,9 +12,43 @@ npm install @buildscaffold/core
 
 ## Entry points
 
-- `@buildscaffold/core` - the `Scaffold` type
+- `@buildscaffold/core` - the `Scaffold` type and scaffolds to compose with `pipe`
 - `@buildscaffold/core/files` - file trees and the operations on them
 - `@buildscaffold/core/diff` - comparing trees and applying the changes to disk
+
+## Scaffolds
+
+```ts
+import {json, merge, pipe, when, write} from '@buildscaffold/core';
+import {fromDisk} from '@buildscaffold/core/files';
+
+const scaffold = pipe(
+  merge(fromDisk(`${import.meta.dirname}/templates`)),
+  write('greeting.txt', 'Hello!'),
+  json.merge('package.json', {private: true}),
+  when((files) => !files.has('README.md'), write('README.md', '# Greeting')),
+);
+```
+
+- `Scaffold` - `(files: Files) => Files | Promise<Files>`, a function from the destination tree to the tree it should become
+- `pipe(...scaffolds)` - pass the tree through each scaffold in order
+- `merge(tree, {to?})` - overlay another tree (or a promise of one, like `fromDisk(...)`), optionally into the `to` directory. Files in the merged tree replace files with the same path
+- `when(condition, scaffold)` - only run the scaffold when `condition(files)` is (or resolves to) `true`
+- `write(path, content)` - write text (as UTF-8) or bytes to a file
+- `copy(from, to, {ignore?})`, `move(from, to, {ignore?})` and `remove(from, {ignore?})` - the [file operations](#file-operations) as scaffolds
+- `json.merge(path, value)` and `json.transform(path, fn)` - the [JSON operations](#json-operations) as scaffolds
+
+Write your own scaffold as a function using the operations in `@buildscaffold/core/files`:
+
+```ts
+import type {Scaffold} from '@buildscaffold/core';
+import {readText, writeText} from '@buildscaffold/core/files';
+
+const shout: Scaffold = async (files) => {
+  const text = (await readText(files, 'greeting.txt')) ?? '';
+  return writeText(files, 'greeting.txt', text.toUpperCase());
+};
+```
 
 ## Files
 
@@ -43,6 +77,21 @@ if (greeting) files = files.set('copy.txt', greeting);
 ### File
 
 Each file in a tree is a `File`, an interface with `bytes()` and `stat()` (its `size` and `mode`). Files loaded by `fromDisk` are only read the first time they're needed, share that read with every tree that holds them, and report their mode on disk. Implement `File` for other sources of files, and add one to a tree with `files.set(path, file)`. Every `File` is treated the same way.
+
+### File operations
+
+Each operation matches a file, the files in a directory (`.` for the whole tree), or the files matching a glob, and throws when nothing matches. Globs match dotfiles. A file is copied or moved to the `to` path, while a directory or glob is copied or moved into the `to` directory, keeping paths relative to the directory or the glob's base, e.g. `copy(files, 'src/**/*.txt', 'dest')` copies `src/a/b.txt` to `dest/a/b.txt`. Content is shared rather than copied.
+
+- `copy(files, from, to, {ignore?})`
+- `move(files, from, to, {ignore?})`
+- `remove(files, from, {ignore?})`
+
+### JSON operations
+
+- `json.read(files, path)` - parse a JSON file, or `undefined` when there is none
+- `json.write(files, path, value)` - write a value as JSON, indented with two spaces and ending with a newline
+- `json.transform(files, path, fn)` - replace a JSON file with the result of `fn` (which may be async), which receives `undefined` when there is no file
+- `json.merge(files, path, value)` - deeply merge a value into a JSON file, creating it when there is none. Objects are merged key by key, and anything else, including arrays, replaces what is in the file
 
 ## Diff
 
