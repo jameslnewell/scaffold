@@ -1,5 +1,5 @@
+import {Files, writeText} from '../files/index.js';
 import {describe, expect, test} from 'vitest';
-import {Files} from '../files/index.js';
 import type {Scaffold} from './Scaffold.js';
 import {pipe} from './pipe.js';
 import {write} from './operations.js';
@@ -18,9 +18,9 @@ describe(pipe, () => {
       log('first'),
       write('a.txt', 'a'),
       log('second'),
-      (files) => files.remove('a.txt').write('b.txt', new Uint8Array()),
+      (files) => writeText(files.delete('a.txt'), 'b.txt', ''),
     )(new Files());
     expect(order).toEqual(['first', 'second']);
-    expect(files.paths()).toEqual(['b.txt']);
+    expect([...files.keys()]).toEqual(['b.txt']);
   });
 });

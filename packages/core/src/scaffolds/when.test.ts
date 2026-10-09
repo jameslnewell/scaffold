@@ -1,5 +1,5 @@
+import {Files, writeText} from '../files/index.js';
 import {describe, expect, test} from 'vitest';
-import {Files} from '../files/index.js';
 import {when} from './when.js';
 import {write} from './operations.js';
 
@@ -15,7 +15,7 @@ describe(when, () => {
   });
 
   test('returns the tree unchanged when the condition is false', async () => {
-    const files = new Files([['README.md', new Uint8Array()]]);
+    const files = writeText(new Files(), 'README.md', '');
     await expect(scaffold(files)).resolves.toBe(files);
   });
 });

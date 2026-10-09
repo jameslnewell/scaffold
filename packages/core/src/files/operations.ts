@@ -1,6 +1,6 @@
 import * as path from 'node:path';
 import {type MatchOptions, match} from './match.js';
-import type {Content} from './Content.js';
+import type {File} from './File.js';
 import {Files} from './Files.js';
 
 export type CopyOptions = MatchOptions;
@@ -15,15 +15,15 @@ interface DestinationsOptions {
 function destinations({files, from, to, options}: DestinationsOptions): Array<{
   source: string;
   destination: string;
-  content: Content;
+  file: File;
 }> {
   return match(files, from, options).map(({file, relative}) => {
-    const content = files.get(file);
-    if (content === undefined) throw new Error(`File "${file}" is missing`);
+    const value = files.get(file);
+    if (value === undefined) throw new Error(`File "${file}" is missing`);
     return {
       source: file,
       destination: relative === undefined ? to : path.posix.join(to, relative),
-      content,
+      file: value,
     };
   });
 }
@@ -47,7 +47,7 @@ export function copy(
   const copies = destinations({files, from, to, options});
   return new Files([
     ...files,
-    ...copies.map(({destination, content}) => [destination, content] as const),
+    ...copies.map(({destination, file}) => [destination, file] as const),
   ]);
 }
 
@@ -72,7 +72,7 @@ export function move(
   const sources = new Set(moves.map(({source}) => source));
   return new Files([
     ...[...files].filter(([file]) => !sources.has(file)),
-    ...moves.map(({destination, content}) => [destination, content] as const),
+    ...moves.map(({destination, file}) => [destination, file] as const),
   ]);
 }
 

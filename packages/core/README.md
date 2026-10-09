@@ -33,7 +33,7 @@ const scaffold = pipe(
 - `pipe(...scaffolds)` - pass the tree through each scaffold in order
 - `when(condition, scaffold)` - only run the scaffold when `condition(files)` is (or resolves to) `true`, and otherwise leave the tree unchanged
 - `merge(tree, {to?})` - overlay a directory (a path or `URL`), a tree, or a promise of a tree, optionally into the `to` directory. Existing files with the same path are replaced by the merged files, which keep their modes
-- `write(path, content, {mode?})` - write text (as UTF-8) or bytes to a file. An existing file is replaced. Without a `mode`, a new file gets the default mode and an existing file keeps its mode
+- `write(path, text, {mode?})` - write a file as UTF-8 text. An existing file is replaced. Without a `mode`, a new file gets the default mode and an existing file keeps its mode on disk
 - `copy(from, to, {ignore?})` - copy a file, directory or glob (see [matching](#file-operations)). Existing files at the destination are replaced, and the copies keep the sources' modes. Throws when nothing matches
 - `move(from, to, {ignore?})` - move a file, directory or glob. Existing files at the destination are replaced, and the moved files keep their modes. Throws when nothing matches
 - `remove(from, {ignore?})` - remove a file, directory or glob. Throws when nothing matches
@@ -82,7 +82,7 @@ Each file in a tree is a `File`, an interface with `bytes()` and `stat()` (its `
 
 ### File operations
 
-Each operation matches a file, the files in a directory (`.` for the whole tree), or the files matching a glob, and throws when nothing matches. Globs match dotfiles. A file is copied or moved to the `to` path, while a directory or glob is copied or moved into the `to` directory, keeping paths relative to the directory or the glob's base, e.g. `copy(files, 'src/**/*.txt', 'dest')` copies `src/a/b.txt` to `dest/a/b.txt`. Content is shared rather than copied.
+Each operation matches a file, the files in a directory (`.` for the whole tree), or the files matching a glob, and throws when nothing matches. Globs match dotfiles. A file is copied or moved to the `to` path, while a directory or glob is copied or moved into the `to` directory, keeping paths relative to the directory or the glob's base, e.g. `copy(files, 'src/**/*.txt', 'dest')` copies `src/a/b.txt` to `dest/a/b.txt`. Files are shared rather than copied, so they aren't read.
 
 - `copy(files, from, to, {ignore?})` - existing files at the destination are replaced, and the copies keep the sources' modes
 - `move(files, from, to, {ignore?})` - existing files at the destination are replaced, and the moved files keep their modes

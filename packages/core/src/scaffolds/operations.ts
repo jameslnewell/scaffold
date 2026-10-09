@@ -2,10 +2,10 @@ import * as files from '../files/index.js';
 import type {Scaffold} from './Scaffold.js';
 
 /**
- * A scaffold which writes a file, encoding text as UTF-8.
+ * A scaffold which writes a file as UTF-8 text.
  *
  * An existing file is replaced. Without a `mode`, a new file gets the default mode and an existing file keeps its
- * mode.
+ * mode on disk.
  *
  * @example
  * write('greeting.txt', 'Hello!')
@@ -13,13 +13,10 @@ import type {Scaffold} from './Scaffold.js';
  */
 export function write(
   file: string,
-  content: string | Uint8Array,
-  options: files.WriteOptions = {},
+  text: string,
+  options: files.WriteTextOptions = {},
 ): Scaffold {
-  return (tree) =>
-    typeof content === 'string'
-      ? files.writeText(tree, file, content, options)
-      : tree.write(file, content, options);
+  return (tree) => files.writeText(tree, file, text, options);
 }
 
 /**

@@ -1,4 +1,4 @@
-import {Files, isLazyContent, readText} from '../files/index.js';
+import {Files, readText} from '../files/index.js';
 import {copy, move, remove, write} from './operations.js';
 import {describe, expect, test} from 'vitest';
 import {pipe} from './pipe.js';
@@ -11,17 +11,9 @@ describe(write, () => {
 
   test('writes with a mode', async () => {
     const files = await write('a.sh', 'echo a', {mode: 0o755})(new Files());
-    const content = files.get('a.sh');
-    if (content === undefined || !isLazyContent(content)) {
-      throw new Error('expected lazy content');
-    }
-    await expect(content.stat()).resolves.toMatchObject({mode: 0o755});
-  });
-
-  test('writes bytes', async () => {
-    const bytes = new Uint8Array([1, 2, 3]);
-    const files = await write('a.bin', bytes)(new Files());
-    expect(files.get('a.bin')).toBe(bytes);
+    await expect(files.get('a.sh')?.stat()).resolves.toMatchObject({
+      mode: 0o755,
+    });
   });
 });
 
@@ -34,6 +26,6 @@ describe('copy, move and remove', () => {
       move('src/*.txt', 'moved'),
       remove('moved/b.txt'),
     )(new Files());
-    expect(files.paths()).toEqual(['copied/a.txt', 'moved/a.txt']);
+    expect([...files.keys()]).toEqual(['copied/a.txt', 'moved/a.txt']);
   });
 });

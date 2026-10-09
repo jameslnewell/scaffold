@@ -4,7 +4,7 @@ import * as path from 'node:path';
 import {afterEach, beforeEach, describe, expect, test} from 'vitest';
 import {apply, diff} from '../diff/index.js';
 import {copy, move, remove} from './operations.js';
-import {readText, writeText} from './text.js';
+import {readText, writeText} from './contents.js';
 import {Files} from './Files.js';
 import {fromDisk} from './fromDisk.js';
 
@@ -18,7 +18,7 @@ function tree(paths: string[]): Files {
 describe(copy, () => {
   test('copies a file to a path', async () => {
     const files = copy(tree(['src/a.txt']), 'src/a.txt', 'dest/b.txt');
-    expect(files.paths()).toEqual(['dest/b.txt', 'src/a.txt']);
+    expect([...files.keys()]).toEqual(['dest/b.txt', 'src/a.txt']);
     await expect(readText(files, 'dest/b.txt')).resolves.toBe('src/a.txt');
   });
 
@@ -28,7 +28,7 @@ describe(copy, () => {
       'src',
       'dest',
     );
-    expect(files.paths()).toEqual([
+    expect([...files.keys()]).toEqual([
       'dest/a.txt',
       'dest/b/c.txt',
       'other.txt',
@@ -43,7 +43,7 @@ describe(copy, () => {
       'src/**/*.txt',
       'dest',
     );
-    expect(files.paths()).toEqual([
+    expect([...files.keys()]).toEqual([
       'dest/a.txt',
       'dest/b/c.txt',
       'src/a.txt',
@@ -56,12 +56,12 @@ describe(copy, () => {
     const files = copy(tree(['src/a.txt', 'src/b.txt']), 'src', 'dest', {
       ignore: ['src/b.txt'],
     });
-    expect(files.paths()).toEqual(['dest/a.txt', 'src/a.txt', 'src/b.txt']);
+    expect([...files.keys()]).toEqual(['dest/a.txt', 'src/a.txt', 'src/b.txt']);
   });
 
   test('copies a file whose name contains glob characters', () => {
     const files = copy(tree(['[id].tsx']), '[id].tsx', 'copy.tsx');
-    expect(files.paths()).toEqual(['[id].tsx', 'copy.tsx']);
+    expect([...files.keys()]).toEqual(['[id].tsx', 'copy.tsx']);
   });
 
   test('shares content rather than copying it', () => {
@@ -71,7 +71,7 @@ describe(copy, () => {
 
   test('copies the whole tree', () => {
     const files = copy(tree(['a.txt', 'b/c.txt']), '.', 'dest');
-    expect(files.paths()).toEqual([
+    expect([...files.keys()]).toEqual([
       'a.txt',
       'b/c.txt',
       'dest/a.txt',
@@ -81,12 +81,12 @@ describe(copy, () => {
 
   test('copies a directory given with a trailing slash', () => {
     const files = copy(tree(['src/a.txt']), 'src/', 'dest');
-    expect(files.paths()).toEqual(['dest/a.txt', 'src/a.txt']);
+    expect([...files.keys()]).toEqual(['dest/a.txt', 'src/a.txt']);
   });
 
   test('copies a directory whose name contains glob characters', () => {
     const files = copy(tree(['app/(auth)/page.tsx']), 'app/(auth)', 'dest');
-    expect(files.paths()).toEqual(['app/(auth)/page.tsx', 'dest/page.tsx']);
+    expect([...files.keys()]).toEqual(['app/(auth)/page.tsx', 'dest/page.tsx']);
   });
 
   test('copies dotfiles matching a glob', () => {
@@ -95,7 +95,7 @@ describe(copy, () => {
       './templates/**',
       '.',
     );
-    expect(files.paths()).toEqual([
+    expect([...files.keys()]).toEqual([
       '.gitignore',
       'a.txt',
       'templates/.gitignore',
@@ -113,17 +113,17 @@ describe(copy, () => {
 describe(move, () => {
   test('moves a file to a path', () => {
     const files = move(tree(['gitignore']), 'gitignore', '.gitignore');
-    expect(files.paths()).toEqual(['.gitignore']);
+    expect([...files.keys()]).toEqual(['.gitignore']);
   });
 
   test('moves the files in a directory into a directory inside it', () => {
     const files = move(tree(['src/a.txt', 'src/b.txt']), 'src', 'src/nested');
-    expect(files.paths()).toEqual(['src/nested/a.txt', 'src/nested/b.txt']);
+    expect([...files.keys()]).toEqual(['src/nested/a.txt', 'src/nested/b.txt']);
   });
 
   test('moves the files matching a glob', () => {
     const files = move(tree(['src/a.txt', 'src/b.md']), 'src/*.txt', 'dest');
-    expect(files.paths()).toEqual(['dest/a.txt', 'src/b.md']);
+    expect([...files.keys()]).toEqual(['dest/a.txt', 'src/b.md']);
   });
 
   describe('when applied', () => {
@@ -160,20 +160,20 @@ describe(move, () => {
 
 describe(remove, () => {
   test('removes a file', () => {
-    expect(remove(tree(['a.txt', 'b.txt']), 'a.txt').paths()).toEqual([
+    expect([...remove(tree(['a.txt', 'b.txt']), 'a.txt').keys()]).toEqual([
       'b.txt',
     ]);
   });
 
   test('removes the files in a directory', () => {
-    expect(remove(tree(['src/a.txt', 'srcs.txt']), 'src').paths()).toEqual([
+    expect([...remove(tree(['src/a.txt', 'srcs.txt']), 'src').keys()]).toEqual([
       'srcs.txt',
     ]);
   });
 
   test('removes the files matching a glob', () => {
-    expect(
-      remove(tree(['src/a.test.ts', 'src/a.ts']), 'src/**/*.test.ts').paths(),
-    ).toEqual(['src/a.ts']);
+    expect([
+      ...remove(tree(['src/a.test.ts', 'src/a.ts']), 'src/**/*.test.ts').keys(),
+    ]).toEqual(['src/a.ts']);
   });
 });

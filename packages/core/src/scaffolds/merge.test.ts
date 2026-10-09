@@ -16,7 +16,7 @@ describe(merge, () => {
 
   test('overlays the tree, replacing files with the same path', async () => {
     const files = await merge(overlay)(destination);
-    expect(files.paths()).toEqual(['a.txt', 'b.txt']);
+    expect([...files.keys()]).toEqual(['a.txt', 'b.txt']);
     await expect(readText(files, 'a.txt')).resolves.toBe('overlay');
   });
 
@@ -34,7 +34,7 @@ describe(merge, () => {
 
   test('overlays the tree into a directory', async () => {
     const files = await merge(overlay, {to: 'src'})(destination);
-    expect(files.paths()).toEqual(['a.txt', 'b.txt', 'src/a.txt']);
+    expect([...files.keys()]).toEqual(['a.txt', 'b.txt', 'src/a.txt']);
   });
 
   test.each([

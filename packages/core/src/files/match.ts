@@ -28,18 +28,17 @@ export function match(
 
   // a file or directory is matched before a glob, so a name with glob characters in it e.g. `[id].tsx` or
   // `(auth)` is still matched
+  const paths = [...files.keys()];
   let matches: Match[];
   if (normalized !== '.' && files.has(normalized)) {
     matches = [{file: normalized, relative: undefined}];
-  } else if (files.paths().some((file) => file.startsWith(prefix))) {
-    matches = files
-      .paths()
+  } else if (paths.some((file) => file.startsWith(prefix))) {
+    matches = paths
       .filter((file) => file.startsWith(prefix))
       .map((file) => ({file, relative: file.slice(prefix.length)}));
   } else if (GLOB_CHARACTERS.test(normalized)) {
     const base = globBase(normalized);
-    matches = files
-      .paths()
+    matches = paths
       .filter((file) => matchesGlob(file, normalized))
       .map((file) => ({file, relative: path.posix.relative(base, file)}));
   } else {

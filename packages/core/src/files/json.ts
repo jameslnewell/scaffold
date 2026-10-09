@@ -1,4 +1,4 @@
-import {readText, writeText} from './text.js';
+import {readText, writeText} from './contents.js';
 import type {Files} from './Files.js';
 
 /**

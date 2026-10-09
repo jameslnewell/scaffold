@@ -1,6 +1,6 @@
 import * as json from './json.js';
 import {describe, expect, test} from 'vitest';
-import {readText, writeText} from './text.js';
+import {readText, writeText} from './contents.js';
 import {Files} from './Files.js';
 
 describe('json', () => {

@@ -32,7 +32,7 @@ export function merge(
     return new Files([
       ...files,
       ...[...overlay].map(
-        ([file, content]) => [path.posix.join(to, file), content] as const,
+        ([file, value]) => [path.posix.join(to, file), value] as const,
       ),
     ]);
   };
