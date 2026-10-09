@@ -17,7 +17,7 @@ describe('create', () => {
     const files = await create.scaffold({name: 'my-package', author: 'Bob'})(
       new Files(),
     );
-    expect(files.paths()).toEqual([
+    expect([...files.keys()]).toEqual([
       '.gitignore',
       'LICENSE',
       'README.md',

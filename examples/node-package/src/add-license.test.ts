@@ -21,6 +21,6 @@ describe('add-license', () => {
     const files = await addLicense.scaffold({author: 'Bob', license: 'MIT'})(
       new Files(),
     );
-    expect(files.paths()).toEqual(['LICENSE']);
+    expect([...files.keys()]).toEqual(['LICENSE']);
   });
 });

@@ -56,7 +56,7 @@ When you run a scaffold, the `scaffold` CLI:
 3. loads the output directory as a file tree, without reading the contents of the files, runs the scaffold over it, and prints the changes and the tasks which will run, e.g. `npm install` or `git init`, so nothing is written yet
 4. writes the changes to disk once you confirm (or pass `--apply`), then runs the tasks
 
-Because the tree is only read when a scaffold needs a file's content, and unchanged files are copied rather than read, scaffolds stay fast in large directories. File modes are kept, so executable files stay executable. Tasks skip themselves when nothing they depend on changed, e.g. `npm install` only runs when `package.json` changed, so running a scaffold again over its own output has nothing to do.
+Because the tree is only read when a scaffold needs a file's content, and unchanged files are copied rather than read, scaffolds stay fast in large directories. Files copied from disk keep their modes, so executable files stay executable. Tasks skip themselves when nothing they depend on changed, e.g. `npm install` only runs when `package.json` changed, so running a scaffold again over its own output has nothing to do.
 
 ## Packages
 

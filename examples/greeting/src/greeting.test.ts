@@ -1,13 +1,13 @@
 import {Files, readText, writeText} from '@buildscaffold/core/files';
 import {describe, expect, test} from 'vitest';
-import type {Diff} from '@buildscaffold/core/diff';
+import {diff} from '@buildscaffold/core/diff';
 import greeting from './greeting.js';
 import {planTasks} from '@buildscaffold/task';
 
 describe('greeting', () => {
   test('greets by name', async () => {
     const files = await greeting.scaffold({name: 'Bob'})(new Files());
-    expect(files.paths()).toEqual([
+    expect([...files.keys()]).toEqual([
       'LICENSE.txt',
       'README.md',
       'bin/greet.sh',
@@ -38,15 +38,15 @@ describe('greeting', () => {
     });
   });
 
-  const change = {type: 'create', content: new Uint8Array()} as const;
-  test.each<[string, Diff, string[]]>([
-    ['with', new Map([['package.json', change]]), ['npm install', 'git init']],
-    ['without', new Map([['greeting.txt', change]]), ['git init']],
-  ])('plans the tasks for changes %s package.json', async (_, diff, labels) => {
+  test.each<[string, string, string[]]>([
+    ['with', 'package.json', ['npm install', 'git init']],
+    ['without', 'greeting.txt', ['git init']],
+  ])('plans the tasks for changes %s package.json', async (_, file, labels) => {
     if (tasks === undefined) throw new Error('expected tasks');
+    const before = new Files();
     const plan = await planTasks(tasks, {
       directory: '/tmp/buildscaffold-missing',
-      diff,
+      diff: await diff(before, writeText(before, file, '')),
     });
     expect(plan).toMatchObject({
       type: 'serial',
