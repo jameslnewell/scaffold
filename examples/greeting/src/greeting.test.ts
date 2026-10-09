@@ -18,7 +18,7 @@ describe('greeting', () => {
   });
 
   test('keeps an existing README', async () => {
-    const existing = writeText(new Files(), 'README.md', '# Mine');
+    const existing = await writeText(new Files(), 'README.md', '# Mine');
     const files = await greeting.scaffold({name: 'Bob'})(existing);
     await expect(readText(files, 'README.md')).resolves.toBe('# Mine');
   });
@@ -46,7 +46,7 @@ describe('greeting', () => {
     const before = new Files();
     const plan = await planTasks(tasks, {
       directory: '/tmp/buildscaffold-missing',
-      diff: await diff(before, writeText(before, file, '')),
+      diff: await diff(before, await writeText(before, file, '')),
     });
     expect(plan).toMatchObject({
       type: 'serial',

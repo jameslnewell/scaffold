@@ -4,7 +4,7 @@ import addLicense from './add-license.js';
 
 describe('add-license', () => {
   test('writes the license and updates package.json', async () => {
-    const existing = json.write(new Files(), 'package.json', {name: 'a'});
+    const existing = await json.write(new Files(), 'package.json', {name: 'a'});
     const files = await addLicense.scaffold({author: 'Bob', license: 'ISC'})(
       existing,
     );
