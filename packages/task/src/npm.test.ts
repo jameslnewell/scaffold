@@ -1,9 +1,14 @@
 import * as npm from './npm.js';
 import {describe, expect, test} from 'vitest';
 import type {Diff} from '@buildscaffold/core/diff';
+import type {File} from '@buildscaffold/core/files';
 import {planTasks} from './planTasks.js';
 
-const change = {type: 'modify', content: new Uint8Array()} as const;
+const file: File = {
+  bytes: () => Promise.resolve(new Uint8Array()),
+  stat: () => Promise.resolve({size: 0}),
+};
+const change = {type: 'modify', file} as const;
 
 describe('npm', () => {
   test('install runs npm install', () => {

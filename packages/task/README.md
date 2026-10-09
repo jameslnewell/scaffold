@@ -54,6 +54,10 @@ Commands are run without a shell, except on Windows, where `.cmd` and `.bat` fil
 Because tasks are plain objects, you can check them with your test runner's matchers, and use `planTasks` to check which would run for a set of changes:
 
 ```ts
+import {Files, writeText} from '@buildscaffold/core/files';
+import {git, npm, planTasks, serial} from '@buildscaffold/task';
+import {diff} from '@buildscaffold/core/diff';
+
 const tasks = serial([npm.install(), git.init()]);
 
 expect(tasks).toMatchObject({
@@ -65,11 +69,11 @@ expect(tasks).toMatchObject({
 });
 
 // package.json didn't change, so npm install would skip itself
+const before = new Files();
+const after = writeText(before, 'greeting.txt', 'Hello!');
 const plan = await planTasks(tasks, {
   directory: '/tmp/empty',
-  diff: new Map([
-    ['greeting.txt', {type: 'create', content: new Uint8Array()}],
-  ]),
+  diff: await diff(before, after),
 });
 expect(plan).toMatchObject({type: 'serial', tasks: [{label: 'git init'}]});
 ```

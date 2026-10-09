@@ -6,7 +6,16 @@ import {parallel, serial} from './collections.js';
 const ctx: TaskContext = {
   directory: process.cwd(),
   diff: new Map([
-    ['greeting.txt', {type: 'create', content: new Uint8Array()}],
+    [
+      'greeting.txt',
+      {
+        type: 'create',
+        file: {
+          bytes: () => Promise.resolve(new Uint8Array()),
+          stat: () => Promise.resolve({size: 0}),
+        },
+      },
+    ],
   ]),
 };
 
