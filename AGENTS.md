@@ -4,13 +4,14 @@
 
 ## Layout
 
-This is a pnpm workspace with a single package, [`packages/scaffold`](packages/scaffold):
+This is a pnpm workspace of `@buildscaffold/*` packages:
 
-- `src/cli.ts` - the `scaffold` CLI
-- `src/lib.ts` - the public API
-- `src/scaffolds/*` - helpers which change files (staged in memory until applied)
-- `src/tasks/*` - helpers for side effects which run after the changes are applied
-- `src/examples/*` - runnable example scaffolds (excluded from the published package)
+- [`packages/core`](packages/core) - file trees (`/files`), diffing and applying them (`/diff`), and composable scaffolds (root). No third-party dependencies
+- [`packages/ejs`](packages/ejs) - EJS templates
+- [`packages/task`](packages/task) - tasks which run after the changes are applied. No third-party dependencies
+- [`packages/github-task`](packages/github-task) - GitHub tasks
+- [`packages/cli`](packages/cli) - the `scaffold` command, and `defineScaffold()` for scaffold modules (`/define`)
+- [`examples/*`](examples) - private, runnable example scaffolds
 
 ## Commands
 
@@ -23,11 +24,12 @@ Run from the repository root:
 - `pnpm run test`
 - `pnpm run build`
 
-For a manual end-to-end check, run `pnpm run example:greeting` from `packages/scaffold` after building. It writes to the git-ignored `packages/scaffold/tmp/greeting`.
+For a manual end-to-end check, run `pnpm run example` from `examples/greeting` after building. It writes to the git-ignored `examples/greeting/tmp/greeting`.
 
 ## Conventions
 
 - ESM: use `.js` extensions in relative imports from TypeScript source
 - Unit tests live next to the source as `*.test.ts`
-- Export new public helpers from `src/lib.ts` and document them in [`packages/scaffold/README.md`](packages/scaffold/README.md)
+- Export new public helpers from the package's entry point (e.g. `src/index.ts`) and document them in the package's `README.md`
+- Follow the "Adding a package" checklist in [CONTRIBUTING.md](CONTRIBUTING.md) for new packages
 - Format with prettier (`pnpm run fix:formatting`) rather than by hand

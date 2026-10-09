@@ -1,0 +1,44 @@
+{
+  "name": "@buildscaffold/example-greeting",
+  "version": "0.0.0",
+  "private": true,
+  "description": "An example scaffold in a single module",
+  "type": "module",
+  "exports": {
+    "./greeting": {
+      "@buildscaffold/source": "./src/greeting.ts",
+      "types": "./dist/greeting.d.ts",
+      "default": "./dist/greeting.js"
+    }
+  },
+  "dependencies": {
+    "@buildscaffold/core": "workspace:^",
+    "@buildscaffold/task": "workspace:^"
+  },
+  "peerDependencies": {
+    "@buildscaffold/cli": "workspace:^"
+  },
+  "devDependencies": {
+    "@buildscaffold/cli": "workspace:*",
+    "@jameslnewell/eslint-config": "^8.0.0",
+    "@jameslnewell/vitest-config": "^8.0.0",
+    "@types/node": "^24.19.1",
+    "@typescript/native": "npm:typescript@^7.0.2",
+    "eslint": "^9.39.5",
+    "typescript": "npm:@typescript/typescript6@^6.0.2",
+    "vite": "^8.3.3",
+    "vitest": "^5.0.3"
+  },
+  "scripts": {
+    "build": "rm -rf ./dist && tsc -p tsconfig.build.json",
+    "check:linting": "eslint .",
+    "check:typing": "tsc",
+    "example": "scaffold ./dist/greeting.js --output-directory ./tmp/greeting --apply --name Bob",
+    "fix:linting": "eslint --fix .",
+    "test": "vitest run --project unit"
+  },
+  "engines": {
+    "node": ">=24"
+  },
+  "license": "MIT"
+}

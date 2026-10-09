@@ -35,12 +35,12 @@ pnpm run test
 Manual testing:
 
 ```console
-cd packages/scaffold
 pnpm run build
-pnpm run example:greeting
+cd examples/greeting
+pnpm run example
 ```
 
-The greeting example writes files, runs `npm install` and initialises a git repository in `packages/scaffold/tmp/greeting` which is git ignored.
+The greeting example writes files and runs `npm install` in `examples/greeting/tmp/greeting`, which is git ignored. It skips `git init`, since that directory is already inside this repository. Run it again to check that it prints `Nothing to do.`
 
 ## Adding a package
 
@@ -69,7 +69,7 @@ Packages are published under the `@buildscaffold` scope. When adding one under `
       "test": "vitest run --project unit"
     }
     ```
-  - the `devDependencies` those scripts use, with the same specifiers as [`packages/scaffold/package.json`](packages/scaffold/package.json): `@jameslnewell/eslint-config`, `@jameslnewell/vitest-config`, `@types/node`, `eslint`, `vite`, `vitest`, and the two aliased TypeScript versions (`"@typescript/native": "npm:typescript@…"` provides `tsc`, and `"typescript": "npm:@typescript/typescript6@…"` is used by `typescript-eslint`)
+  - the `devDependencies` those scripts use, with the same specifiers as [`packages/core/package.json`](packages/core/package.json): `@jameslnewell/eslint-config`, `@jameslnewell/vitest-config`, `@types/node`, `eslint`, `vite`, `vitest`, and the two aliased TypeScript versions (`"@typescript/native": "npm:typescript@…"` provides `tsc`, and `"typescript": "npm:@typescript/typescript6@…"` is used by `typescript-eslint`)
 - [ ] `tsconfig.json` extends `../../tsconfig.base.json`, which enables the `@buildscaffold/source` condition, and `tsconfig.build.json` extends `tsconfig.json`
 - [ ] `eslint.config.mjs` uses the shared config. It needs no settings for the `@buildscaffold/source` condition, because `tsc` checks the imports in `src`:
   ```js
@@ -94,5 +94,5 @@ Packages are published under the `@buildscaffold` scope. When adding one under `
     }),
   );
   ```
-- [ ] Other workspace packages are depended on with `workspace:*`. A package that a scaffold shares with the runner (e.g. `@buildscaffold/cli`) is a `peerDependency`, so there is only one copy at runtime.
+- [ ] Other workspace packages are depended on with `workspace:^` in `dependencies` and `peerDependencies`, so they're published as version ranges, and with `workspace:*` in `devDependencies`. A package that a scaffold shares with the runner (e.g. `@buildscaffold/cli`) is a `peerDependency`, so there is only one copy at runtime.
 - [ ] `@buildscaffold/core` and `@buildscaffold/task` have no third-party `dependencies`. Capabilities that need one belong in their own package, so a scaffold only installs what it uses.
