@@ -3,9 +3,18 @@ import * as os from 'node:os';
 import * as path from 'node:path';
 import {Files, fromDisk, writeText} from '../files/index.js';
 import {afterEach, beforeEach, describe, expect, test, vi} from 'vitest';
-import {DiskContent} from '../files/DiskContent.js';
+import {DiskFile} from '../files/DiskFile.js';
+import type {File} from '../files/File.js';
 import {apply} from './apply.js';
 import {diff} from './diff.js';
+
+// another implementation of File, with a mode
+function withMode(bytes: Uint8Array, mode: number): File {
+  return {
+    bytes: () => Promise.resolve(bytes),
+    stat: () => Promise.resolve({size: bytes.byteLength, mode}),
+  };
+}
 
 describe(apply, () => {
   let dir: string;
@@ -31,7 +40,7 @@ describe(apply, () => {
     await write('deleted/file.txt', 'deleted');
     const before = await fromDisk(dir);
     const after = writeText(
-      writeText(before.remove('deleted/file.txt'), 'modified.txt', 'after'),
+      writeText(before.delete('deleted/file.txt'), 'modified.txt', 'after'),
       'created/file.txt',
       'created',
     );
@@ -71,42 +80,65 @@ describe(apply, () => {
   );
 
   test.skipIf(process.platform === 'win32')(
-    'sets the mode of files written with a mode, and keeps the mode of files written without one',
+    'sets the mode of files written with one, keeps the mode of files written without one, and ignores the mode of other implementations of File',
     async () => {
       await write('kept.sh', 'echo kept');
       await fs.chmod(path.join(dir, 'kept.sh'), 0o755);
       const before = await fromDisk(dir);
       let after = writeText(before, 'kept.sh', 'echo changed');
-      after = writeText(after, 'created.sh', 'echo created', {mode: 0o700});
+      after = writeText(after, 'executable.sh', 'echo run', {mode: 0o700});
+      after = after.set(
+        'created.sh',
+        withMode(new TextEncoder().encode('echo created'), 0o700),
+      );
 
       await apply(dir, await diff(before, after));
 
       expect((await fs.stat(path.join(dir, 'kept.sh'))).mode & 0o777).toBe(
         0o755,
       );
-      expect((await fs.stat(path.join(dir, 'created.sh'))).mode & 0o777).toBe(
-        0o700,
-      );
+      expect(
+        (await fs.stat(path.join(dir, 'executable.sh'))).mode & 0o777,
+      ).toBe(0o700);
+      expect(
+        (await fs.stat(path.join(dir, 'created.sh'))).mode & 0o777,
+      ).not.toBe(0o700);
     },
   );
 
   test.skipIf(process.platform === 'win32')(
-    'keeps the mode of a file overwritten with copied content which has no mode',
+    'keeps the mode of a file overwritten by another implementation of File without a mode',
     async () => {
-      await write('source.txt', 'source');
       await write('kept.sh', 'echo kept');
       await fs.chmod(path.join(dir, 'kept.sh'), 0o755);
       const before = await fromDisk(dir);
-      const after = before.write('kept.sh', {
-        read: () => Promise.resolve(new Uint8Array()),
-        stat: () => Promise.resolve({size: 6}),
-        path: path.join(dir, 'source.txt'),
+      const bytes = new TextEncoder().encode('source');
+      const after = before.set('kept.sh', {
+        bytes: () => Promise.resolve(bytes),
+        stat: () => Promise.resolve({size: bytes.byteLength}),
       });
 
       await apply(dir, await diff(before, after));
 
       await expect(read('kept.sh')).resolves.toBe('source');
       expect((await fs.stat(path.join(dir, 'kept.sh'))).mode & 0o777).toBe(
+        0o755,
+      );
+    },
+  );
+
+  test.skipIf(process.platform === 'win32')(
+    'keeps the mode of a file copied with set',
+    async () => {
+      await write('run.sh', 'echo run');
+      await fs.chmod(path.join(dir, 'run.sh'), 0o755);
+      const before = await fromDisk(dir);
+      const run = before.get('run.sh');
+      if (run === undefined) throw new Error('missing file');
+
+      await apply(dir, await diff(before, before.set('copy.sh', run)));
+
+      expect((await fs.stat(path.join(dir, 'copy.sh'))).mode & 0o777).toBe(
         0o755,
       );
     },
@@ -119,7 +151,7 @@ describe(apply, () => {
     const a = before.get('a.txt');
     const b = before.get('b.txt');
     if (a === undefined || b === undefined) throw new Error('missing files');
-    const after = before.write('a.txt', b).write('b.txt', a);
+    const after = before.set('a.txt', b).set('b.txt', a);
 
     await apply(dir, await diff(before, after));
 
@@ -134,7 +166,7 @@ describe(apply, () => {
     const a = before.get('a.txt');
     const b = before.get('b.txt');
     if (a === undefined || b === undefined) throw new Error('missing files');
-    const after = before.write('a.txt', b).write('b.txt', a);
+    const after = before.set('a.txt', b).set('b.txt', a);
 
     await apply(await fs.realpath(`${dir}/./`), await diff(before, after));
 
@@ -142,14 +174,14 @@ describe(apply, () => {
     await expect(read('b.txt')).resolves.toBe('a');
   });
 
-  test('copies unchanged sources within the directory without reading them', async () => {
+  test('copies unchanged files within the directory without reading them', async () => {
     await write('a.txt', 'a');
-    const read = vi.spyOn(DiskContent.prototype, 'read');
+    const read = vi.spyOn(DiskFile.prototype, 'bytes');
     const before = await fromDisk(dir);
     const a = before.get('a.txt');
     if (a === undefined) throw new Error('missing file');
 
-    await apply(dir, await diff(before, before.write('copy.txt', a)));
+    await apply(dir, await diff(before, before.set('copy.txt', a)));
 
     expect(read).not.toHaveBeenCalled();
     await expect(fs.readFile(path.join(dir, 'copy.txt'), 'utf8')).resolves.toBe(
@@ -173,7 +205,7 @@ describe(apply, () => {
       path.join(template, 'large.bin'),
       Buffer.alloc(64 * 1024 * 1024),
     );
-    const read = vi.spyOn(DiskContent.prototype, 'read');
+    const read = vi.spyOn(DiskFile.prototype, 'bytes');
 
     // populate the destination from the template
     const empty = await fromDisk(destination);

@@ -1,8 +1,10 @@
 import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
-import {type Content, isLazyContent, modeOf, pathOf} from '../files/Content.js';
 import type {Diff} from './diff.js';
+import {DiskFile} from '../files/DiskFile.js';
+import type {File} from '../files/File.js';
 import {concurrently} from '../files/concurrently.js';
+import {modeOf} from '../files/modeOf.js';
 
 /**
  * Write the changes to a directory, creating it if it doesn't exist: create and modify files, and delete files
@@ -20,39 +22,31 @@ import {concurrently} from '../files/concurrently.js';
 export async function apply(dir: string, diff: Diff): Promise<void> {
   const root = path.resolve(dir);
 
-  const writes: [string, Content][] = [];
+  const writes: [string, File][] = [];
   const deletes: string[] = [];
   for (const [file, change] of diff) {
     if (change.type === 'delete') {
       deletes.push(file);
     } else {
-      writes.push([file, change.content]);
+      writes.push([file, change.file]);
     }
   }
 
   // a file copied or moved within the directory may be overwritten or deleted before it has been copied, e.g.
   // when swapping two files, so those sources are read into memory before anything is written. Real paths are
   // compared, so the directory can be given with a different spelling or through a symlink.
+  const preloaded = new Set<File>();
   const realRoot = await realpathIfExists(root);
   if (realRoot !== undefined) {
     await concurrently({
-      items: writes.entries(),
-      task: async ([index, [file, content]]) => {
-        const source = pathOf(content);
-        if (source === undefined || !isLazyContent(content)) return;
-        const relative = path.relative(realRoot, await fs.realpath(source));
+      items: writes,
+      task: async ([, value]) => {
+        if (!(value instanceof DiskFile)) return;
+        const relative = path.relative(realRoot, await fs.realpath(value.path));
         if (!diff.has(relative.split(path.sep).join('/'))) return;
-        const bytes = await content.read();
-        const mode = await modeOf(content);
-        writes[index] = [
-          file,
-          mode === undefined
-            ? bytes
-            : {
-                read: () => Promise.resolve(bytes),
-                stat: () => Promise.resolve({size: bytes.byteLength, mode}),
-              },
-        ];
+        // the read and the stat are cached on the file, so they're kept until it's written
+        await Promise.all([value.bytes(), value.stat()]);
+        preloaded.add(value);
       },
     });
   }
@@ -78,33 +72,29 @@ export async function apply(dir: string, diff: Diff): Promise<void> {
 
   await concurrently({
     items: writes,
-    task: async ([file, content]) => {
+    task: async ([file, value]) => {
       const destination = path.join(root, file);
-      const source = pathOf(content);
-      const mode = await modeOf(content);
-      if (source !== undefined) {
-        // copyFile() also copies the source's mode, so the existing mode is restored for content without one
-        const previousMode =
-          mode === undefined ? await modeIfExists(destination) : undefined;
-        // copies natively (or clones where the filesystem supports it) so the bytes never pass through JS
-        await fs.copyFile(source, destination, fs.constants.COPYFILE_FICLONE);
-        if (previousMode !== undefined && process.platform !== 'win32') {
-          await fs.chmod(destination, previousMode);
-        }
-      } else {
-        await fs.writeFile(
+      if (value instanceof DiskFile && !preloaded.has(value)) {
+        // copies natively (or clones where the filesystem supports it) so the bytes never pass through JS, along
+        // with the source's mode
+        await fs.copyFile(
+          value.path,
           destination,
-          isLazyContent(content) ? await content.read() : content,
+          fs.constants.COPYFILE_FICLONE,
         );
+        return;
       }
-      // the mode may differ from the source's, and writeFile() doesn't change the mode of an existing file.
-      // Windows only has a read-only flag, so modes aren't applied there.
-      if (mode !== undefined && process.platform !== 'win32') {
-        await fs.chmod(destination, mode);
+      // writeFile() keeps the mode of an existing file, so a file without a mode keeps its mode
+      await fs.writeFile(destination, await value.bytes());
+      // Windows only has a read-only flag, so modes aren't applied there
+      if (process.platform !== 'win32') {
+        const mode = await modeOf(value);
+        if (mode !== undefined) await fs.chmod(destination, mode);
       }
     },
   });
 }
+
 interface RemoveEmptyDirectoriesOptions {
   root: string;
   files: string[];
@@ -154,13 +144,5 @@ async function realpathIfExists(file: string): Promise<string | undefined> {
       return undefined;
     }
     throw error;
-  }
-}
-
-async function modeIfExists(file: string): Promise<number | undefined> {
-  try {
-    return (await fs.stat(file)).mode;
-  } catch {
-    return undefined;
   }
 }

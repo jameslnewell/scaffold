@@ -1,5 +1,5 @@
 import * as path from 'node:path';
-import {type Content, isLazyContent, withMode} from './Content.js';
+import type {File} from './File.js';
 
 function normalize(file: string): string {
   if (path.posix.isAbsolute(file) || path.win32.isAbsolute(file)) {
@@ -15,28 +15,26 @@ function normalize(file: string): string {
   return normalized;
 }
 
-export interface WriteOptions {
-  /** The file mode e.g. `0o755` for an executable */
-  mode?: number | undefined;
-}
-
 /**
- * An immutable tree of files, keyed by relative POSIX paths e.g. `src/index.ts`.
+ * An immutable tree of files, keyed by relative POSIX paths e.g. `src/index.ts`. It works like a `Map`, except
+ * `set` and `delete` return a new tree.
  *
- * Every change returns a new tree. Content is shared by reference, so copying files is cheap and files which
- * were loaded from disk aren't read until they're needed.
+ * Files are shared by reference, so copying a file is cheap, and files loaded from disk aren't read until they're
+ * needed. Use `readText` and `writeText` to read and write text, or `get(path)?.bytes()` to read bytes.
  *
  * @example
- * const files = new Files().write('greeting.txt', new TextEncoder().encode('Hello!'));
- * files.has('greeting.txt'); // true
+ * let files = writeText(new Files(), 'greeting.txt', 'Hello!');
+ * const greeting = files.get('greeting.txt');
+ * if (greeting) files = files.set('copy.txt', greeting);
+ * files.has('copy.txt'); // true
  */
-export class Files implements Iterable<[string, Content]> {
-  #entries: ReadonlyMap<string, Content>;
+export class Files implements Iterable<[string, File]> {
+  #entries: ReadonlyMap<string, File>;
 
-  constructor(entries: Iterable<readonly [string, Content]> = []) {
-    const normalized = new Map<string, Content>();
-    for (const [file, content] of entries) {
-      normalized.set(normalize(file), content);
+  constructor(entries: Iterable<readonly [string, File]> = []) {
+    const normalized = new Map<string, File>();
+    for (const [file, value] of entries) {
+      normalized.set(normalize(file), value);
     }
     this.#entries = normalized;
   }
@@ -51,55 +49,52 @@ export class Files implements Iterable<[string, Content]> {
     return this.#entries.has(normalize(file));
   }
 
-  /** The content of the file at the path, without reading it */
-  get(file: string): Content | undefined {
+  /** The file at the path, without reading it, or `undefined` when there is none */
+  get(file: string): File | undefined {
     return this.#entries.get(normalize(file));
   }
 
-  /** The bytes of the file at the path, or `undefined` when there is no file */
-  async read(file: string): Promise<Uint8Array | undefined> {
-    const content = this.get(file);
-    if (content === undefined || !isLazyContent(content)) return content;
-    return content.read();
-  }
-
-  /**
-   * A new tree with the file at the path replaced. A file written without a `mode` gets the default mode when it's
-   * created, and keeps its mode when it already exists on disk.
-   */
-  write(file: string, content: Content, {mode}: WriteOptions = {}): Files {
+  /** A new tree with the file at the path replaced */
+  set(file: string, value: File): Files {
     const entries = new Map(this.#entries);
-    entries.set(
-      normalize(file),
-      mode === undefined ? content : withMode(content, mode),
-    );
+    entries.set(normalize(file), value);
     return Files.#from(entries);
   }
 
   /** A new tree without the file at the path */
-  remove(file: string): Files {
+  delete(file: string): Files {
     const entries = new Map(this.#entries);
     entries.delete(normalize(file));
     return Files.#from(entries);
   }
 
   // skips normalising the paths again, which would make each change to a large tree much slower
-  static #from(entries: ReadonlyMap<string, Content>): Files {
+  static #from(entries: ReadonlyMap<string, File>): Files {
     const files = new Files();
     files.#entries = entries;
     return files;
   }
 
-  /** The paths of every file in the tree, sorted */
-  paths(): string[] {
-    return [...this.#entries.keys()].sort();
+  /** The paths of the files in the tree, sorted */
+  keys(): IterableIterator<string> {
+    return [...this.#entries.keys()].sort()[Symbol.iterator]();
   }
 
-  /** Iterates over each `[path, content]` in the tree, sorted by path */
-  *[Symbol.iterator](): Iterator<[string, Content]> {
-    for (const file of this.paths()) {
-      const content = this.#entries.get(file);
-      if (content !== undefined) yield [file, content];
+  /** The files in the tree, sorted by path */
+  *values(): IterableIterator<File> {
+    for (const [, value] of this.entries()) yield value;
+  }
+
+  /** Each `[path, file]` in the tree, sorted by path */
+  *entries(): IterableIterator<[string, File]> {
+    for (const file of this.keys()) {
+      const value = this.#entries.get(file);
+      if (value !== undefined) yield [file, value];
     }
+  }
+
+  /** Each `[path, file]` in the tree, sorted by path */
+  [Symbol.iterator](): IterableIterator<[string, File]> {
+    return this.entries();
   }
 }

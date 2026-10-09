@@ -2,10 +2,10 @@ import * as fs from 'node:fs/promises';
 import * as os from 'node:os';
 import * as path from 'node:path';
 import {afterEach, beforeEach, describe, expect, test, vi} from 'vitest';
-import {DiskContent} from './DiskContent.js';
+import {DiskFile} from './DiskFile.js';
 import {fromDisk} from './fromDisk.js';
 import {pathToFileURL} from 'node:url';
-import {readText} from './text.js';
+import {readText} from './contents.js';
 
 describe(fromDisk, () => {
   let dir: string;
@@ -34,7 +34,7 @@ describe(fromDisk, () => {
 
   test('loads files and dotfiles, ignoring .git and node_modules anywhere by default', async () => {
     const files = await fromDisk(dir);
-    expect(files.paths()).toEqual([
+    expect([...files.keys()]).toEqual([
       '.env',
       '.github/workflows/ci.yml',
       'README.md',
@@ -45,7 +45,7 @@ describe(fromDisk, () => {
 
   test('loads only files matching the glob', async () => {
     const files = await fromDisk(dir, {glob: '**/*.{yml,ts}'});
-    expect(files.paths()).toEqual([
+    expect([...files.keys()]).toEqual([
       '.github/workflows/ci.yml',
       'src/index.test.ts',
       'src/index.ts',
@@ -56,7 +56,7 @@ describe(fromDisk, () => {
     const files = await fromDisk(dir, {
       ignore: ['src/*.test.ts', '.github/**'],
     });
-    expect(files.paths()).toEqual([
+    expect([...files.keys()]).toEqual([
       '.env',
       '.git/HEAD',
       'README.md',
@@ -68,7 +68,7 @@ describe(fromDisk, () => {
 
   test('loads a directory given as a URL', async () => {
     const files = await fromDisk(pathToFileURL(dir), {glob: 'README.md'});
-    expect(files.paths()).toEqual(['README.md']);
+    expect([...files.keys()]).toEqual(['README.md']);
   });
 
   test('loads a directory which does not exist as an empty tree', async () => {
@@ -77,7 +77,7 @@ describe(fromDisk, () => {
   });
 
   test('reads contents lazily and only once', async () => {
-    const read = vi.spyOn(DiskContent.prototype, 'read');
+    const read = vi.spyOn(DiskFile.prototype, 'bytes');
     const files = await fromDisk(dir);
     expect(read).not.toHaveBeenCalled();
     await expect(readText(files, 'README.md')).resolves.toBe('# Readme');

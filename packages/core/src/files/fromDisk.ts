@@ -1,6 +1,6 @@
 import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
-import {DiskContent} from './DiskContent.js';
+import {DiskFile} from './DiskFile.js';
 import {Files} from './Files.js';
 import {fileURLToPath} from 'node:url';
 import {matchesGlob} from './matchesGlob.js';
@@ -35,7 +35,7 @@ export async function fromDisk(
   const isIgnored = (file: string): boolean =>
     ignore.some((pattern) => matchesGlob(file, pattern));
 
-  const entries: [string, DiskContent][] = [];
+  const entries: [string, DiskFile][] = [];
 
   // walks the tree by hand rather than using fs.glob() because fs.glob() can't match dotfiles, and so ignored
   // directories like node_modules can be skipped without listing their contents
@@ -60,7 +60,7 @@ export async function fromDisk(
         } else if (dirent.isFile()) {
           if (isIgnored(file)) return;
           if (glob !== undefined && !matchesGlob(file, glob)) return;
-          entries.push([file, new DiskContent(path.join(root, file))]);
+          entries.push([file, new DiskFile(path.join(root, file))]);
         }
       }),
     );

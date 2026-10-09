@@ -18,29 +18,31 @@ npm install @buildscaffold/core
 
 ## Files
 
-`Files` is an immutable tree of files keyed by relative POSIX paths, e.g. `src/index.ts`. Every change returns a new tree, and file contents are shared by reference, so copying files is cheap. Directories are implied by the files in them, so empty directories can't be represented.
+`Files` is an immutable tree of files keyed by relative POSIX paths, e.g. `src/index.ts`. It works like a `Map`, except that `set` and `delete` return a new tree. Files are shared by reference, so copying one is cheap. Directories are implied by the files in them, so empty directories can't be represented.
 
 ```ts
-import {Files, fromDisk, readText, writeText} from '@buildscaffold/core/files';
+import {fromDisk, readText, writeText} from '@buildscaffold/core/files';
 
 let files = await fromDisk('./my-project');
 files = writeText(files, 'greeting.txt', 'Hello!');
 files.has('greeting.txt'); // true
 await readText(files, 'greeting.txt'); // 'Hello!'
+
+// copy a file without reading it
+const greeting = files.get('greeting.txt');
+if (greeting) files = files.set('copy.txt', greeting);
 ```
 
-- `new Files(entries?)` - a tree from `[path, content]` entries
-- `files.has(path)`, `files.get(path)`, `files.read(path)`, `files.paths()` and `files.size` - read the tree
-- `files.write(path, content, {mode?})` and `files.remove(path)` - return a changed tree. A file written without a `mode` gets the default mode when it's created, and keeps its mode when it already exists
-- `fromDisk(dir, {glob?, ignore?})` - load a tree from a directory, given as a path or a `URL`. Paths are listed straight away but contents are only read when needed. Dotfiles are loaded (and `*` and `**` match them), `**/.git/**` and `**/node_modules/**` are ignored unless `ignore` replaces them, symbolic links are skipped, and a missing directory loads as an empty tree
-- `readText(files, path)` and `writeText(files, path, text, {mode?})` - read and write UTF-8 text
+- `new Files(entries?)` - a tree from `[path, file]` entries
+- `files.has(path)`, `files.get(path)`, `files.keys()`, `files.values()`, `files.entries()` and `files.size`, and iterating over `[path, file]`, read the tree in path order. `get` returns the `File` without reading it, and `files.get(path)?.bytes()` reads its bytes
+- `files.set(path, file)` and `files.delete(path)` return a changed tree
+- `fromDisk(dir, {glob?, ignore?})` - load a tree from a directory, given as a path or a `URL`. Paths are listed straight away but files are only read when needed. Dotfiles are loaded (and `*` and `**` match them), `**/.git/**` and `**/node_modules/**` are ignored unless `ignore` replaces them, symbolic links are skipped, and a missing directory loads as an empty tree
+- `readText(files, path)` - read a file as UTF-8 text, or `undefined` when there is none
+- `writeText(files, path, text, {mode?})` - write a file as UTF-8 text. This is the only way to set a mode. Without one, a new file gets the default mode and an existing file keeps its mode on disk
 
-### Content
+### File
 
-A file's content is a `Content`: either bytes (a `Uint8Array`) or a `LazyContent`, which is loaded when it's needed. Files loaded by `fromDisk` are lazy content which reads the file on disk the first time it's needed, and shares that read with every tree that holds it.
-
-- `LazyContent` - an interface with `read()`, `stat()` (its `size` and optional `mode`) and an optional `path` to a file on disk which holds the content, so it can be copied without being read. Implement it for other sources of content
-- `isLazyContent(content)` - whether the content is lazy rather than bytes
+Each file in a tree is a `File`, an interface with `bytes()` and `stat()` (its `size` and optional `mode`). Files loaded by `fromDisk` are only read the first time they're needed, share that read with every tree that holds them, and report their mode on disk. Implement `File` for other sources of files, and add one to a tree with `files.set(path, file)`. A mode reported by your own implementation is ignored, since `writeText` is the only way to set one.
 
 ## Diff
 
@@ -60,4 +62,4 @@ await apply(dir, changes);
 
 Only files that were replaced are read to compare them, and files loaded from disk are copied natively rather than read into memory (unless the file they're copied from is itself being changed, e.g. when swapping two files), so large directories and files are cheap to diff and apply. Only files that `fromDisk` loaded can be deleted, so ignored files are never touched.
 
-Modes are kept, so executable files like `bin` scripts and git hooks stay executable. Files loaded from disk keep their mode, a file written with a mode gets it, and a file written without one gets the default mode when it's created and keeps its mode when it's modified. On Windows, modes are neither applied nor compared.
+Modes are kept, so executable files like `bin` scripts and git hooks stay executable. A file loaded from disk keeps its mode, including when it's copied or moved to another path, a file written by `writeText` with a `mode` gets it, and `diff` reports a change in mode alone as a modify. A file written without a mode gets the default mode when it's created and keeps its mode when it's modified. On Windows, modes are neither applied nor compared.

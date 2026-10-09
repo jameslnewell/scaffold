@@ -1,20 +1,16 @@
 import * as fs from 'node:fs/promises';
-import {
-  type Content,
-  isLazyContent,
-  modeOf,
-  pathOf,
-  sizeOf,
-} from '../files/Content.js';
+import {DiskFile} from '../files/DiskFile.js';
+import type {File} from '../files/File.js';
 import type {Files} from '../files/Files.js';
 import {concurrently} from '../files/concurrently.js';
+import {modeOf} from '../files/modeOf.js';
 
 // large enough to compare quickly, small enough that large files are never fully buffered
 const CHUNK_SIZE = 64 * 1024;
 
 export type Change =
-  | {type: 'create'; content: Content}
-  | {type: 'modify'; content: Content}
+  | {type: 'create'; file: File}
+  | {type: 'modify'; file: File}
   | {type: 'delete'};
 
 /**
@@ -29,9 +25,9 @@ export type Diff = ReadonlyMap<string, Change>;
  * Compare two trees, typically the tree loaded from disk and the tree a scaffold produced.
  *
  * Files only in `after` are created, files only in `before` are deleted, and files in both are modified when
- * their contents or modes differ. A file without a mode keeps the mode it has, so isn't modified by its mode. Modes
- * are ignored on Windows. Files whose content is still the same object as in `before` are unchanged without being
- * read, so only the files a scaffold replaced are compared.
+ * their bytes or modes differ. A file without a mode keeps the mode it has, so isn't modified by its mode. Modes
+ * are ignored on Windows. Files which are still the same object as in `before` are unchanged without being read,
+ * so only the files a scaffold replaced are compared.
  *
  * @example
  * const before = await fromDisk(dir);
@@ -41,29 +37,34 @@ export type Diff = ReadonlyMap<string, Change>;
 export async function diff(before: Files, after: Files): Promise<Diff> {
   const changes = new Map<string, Change>();
 
-  const replaced: [string, Content][] = [];
-  for (const [file, content] of after) {
+  const replaced: [string, File][] = [];
+  for (const [file, value] of after) {
     const previous = before.get(file);
     if (previous === undefined) {
-      changes.set(file, {type: 'create', content});
-    } else if (previous !== content) {
-      replaced.push([file, content]);
+      changes.set(file, {type: 'create', file: value});
+    } else if (previous !== value) {
+      replaced.push([file, value]);
     }
   }
-  for (const file of before.paths()) {
+  for (const file of before.keys()) {
     if (!after.has(file)) changes.set(file, {type: 'delete'});
   }
 
   await concurrently({
     items: replaced,
-    task: async ([file, content]) => {
+    task: async ([file, value]) => {
       const previous = before.get(file);
       if (previous === undefined) return;
+      const [previousSize, size] = await Promise.all([
+        sizeOf(previous),
+        sizeOf(value),
+      ]);
       const isSame =
-        (await isSameMode(previous, content)) &&
-        (await isSameContent(previous, content));
+        (await isSameMode(previous, value)) &&
+        previousSize === size &&
+        (await isSameBytes({a: previous, b: value, size}));
       if (!isSame) {
-        changes.set(file, {type: 'modify', content});
+        changes.set(file, {type: 'modify', file: value});
       }
     },
   });
@@ -71,25 +72,32 @@ export async function diff(before: Files, after: Files): Promise<Diff> {
   return new Map([...changes].sort(([a], [b]) => (a < b ? -1 : 1)));
 }
 
-async function isSameMode(before: Content, after: Content): Promise<boolean> {
-  // modes aren't applied on Windows, which only has a read-only flag, so they can't differ there
+// files on disk are measured without being read, while the size of any other file is taken from its bytes, so a
+// size which doesn't match its bytes can't hide a change
+async function sizeOf(file: File): Promise<number> {
+  return file instanceof DiskFile
+    ? (await file.stat()).size
+    : (await file.bytes()).byteLength;
+}
+
+// a file without a mode keeps the mode it has. Modes aren't applied on Windows, which only has a read-only flag, so
+// they can't differ there.
+async function isSameMode(before: File, after: File): Promise<boolean> {
   if (process.platform === 'win32') return true;
-  const mode = await modeOf(after);
-  if (mode === undefined) return true;
-  const previous = await modeOf(before);
-  if (previous === undefined) return true;
+  const [previous, mode] = await Promise.all([modeOf(before), modeOf(after)]);
+  if (mode === undefined || previous === undefined) return true;
   return (mode & 0o7777) === (previous & 0o7777);
 }
 
-async function isSameContent(a: Content, b: Content): Promise<boolean> {
-  const pathA = pathOf(a);
-  if (pathA !== undefined && pathA === pathOf(b)) return true;
+interface IsSameBytesOptions {
+  a: File;
+  b: File;
+  size: number;
+}
 
-  const size = await sizeOf(a);
-  if (size !== (await sizeOf(b))) return false;
-
-  if (!isLazyContent(a) && !isLazyContent(b)) {
-    return Buffer.from(a.buffer, a.byteOffset, a.byteLength).equals(b);
+async function isSameBytes({a, b, size}: IsSameBytesOptions): Promise<boolean> {
+  if (a instanceof DiskFile && b instanceof DiskFile && a.path === b.path) {
+    return true;
   }
 
   const readerA = await openChunkReader(a);
@@ -118,10 +126,10 @@ interface ChunkReader {
   close(): Promise<void>;
 }
 
-async function openChunkReader(content: Content): Promise<ChunkReader> {
-  const file = pathOf(content);
-  if (file === undefined) {
-    const bytes = isLazyContent(content) ? await content.read() : content;
+// a file on disk is compared in chunks through a file handle, so a large file is never fully read into memory
+async function openChunkReader(file: File): Promise<ChunkReader> {
+  if (!(file instanceof DiskFile)) {
+    const bytes = await file.bytes();
     const buffer = Buffer.from(
       bytes.buffer,
       bytes.byteOffset,
@@ -133,7 +141,7 @@ async function openChunkReader(content: Content): Promise<ChunkReader> {
       close: () => Promise.resolve(),
     };
   }
-  const handle = await fs.open(file);
+  const handle = await fs.open(file.path);
   return {
     read: async (offset, length) => {
       const chunk = Buffer.alloc(length);
