@@ -34,9 +34,9 @@ describe(exec, () => {
 
   test('runs the command in the scaffolded directory', async () => {
     await exec(process.execPath, writeCwd).run({directory: dir, diff});
-    await expect(fs.readFile(path.join(dir, 'cwd.txt'), 'utf8')).resolves.toBe(
-      await fs.realpath(dir),
-    );
+    // real paths are compared, since the temporary directory may be a symlink or (on Windows) a short 8.3 name
+    const cwd = await fs.readFile(path.join(dir, 'cwd.txt'), 'utf8');
+    expect(await fs.realpath(cwd)).toBe(await fs.realpath(dir));
   });
 
   test('runs the command in a directory relative to the scaffolded directory', async () => {
@@ -44,9 +44,10 @@ describe(exec, () => {
       directory: dir,
       diff,
     });
-    await expect(
-      fs.readFile(path.join(dir, 'nested', 'cwd.txt'), 'utf8'),
-    ).resolves.toBe(await fs.realpath(path.join(dir, 'nested')));
+    const cwd = await fs.readFile(path.join(dir, 'nested', 'cwd.txt'), 'utf8');
+    expect(await fs.realpath(cwd)).toBe(
+      await fs.realpath(path.join(dir, 'nested')),
+    );
   });
 
   test('fails when the command exits with a non-zero code', async () => {

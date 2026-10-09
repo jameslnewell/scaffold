@@ -1,6 +1,7 @@
 import * as path from 'node:path';
 import type {FunctionTask, When} from './Task.js';
 import {spawn} from 'node:child_process';
+import {toWindowsSpawn} from './windows.js';
 
 export interface ExecOptions {
   /** The directory to run the command in, relative to the scaffolded directory */
@@ -32,11 +33,25 @@ export function exec(
     type: 'function',
     label: cwd === undefined ? label : `${label} (in ${cwd})`,
     params: cwd === undefined ? {command, args} : {command, args, cwd},
-    run: (ctx) =>
-      new Promise<void>((resolve, reject) => {
-        const child = spawn(command, args, {
-          cwd: path.resolve(ctx.directory, cwd ?? '.'),
+    run: async (ctx) => {
+      const directory = path.resolve(ctx.directory, cwd ?? '.');
+      const {
+        file,
+        args: spawnArgs,
+        verbatim,
+      } = process.platform === 'win32'
+        ? await toWindowsSpawn({
+            command,
+            args,
+            cwd: directory,
+            env: process.env,
+          })
+        : {file: command, args, verbatim: false};
+      await new Promise<void>((resolve, reject) => {
+        const child = spawn(file, spawnArgs, {
+          cwd: directory,
           stdio: 'inherit',
+          windowsVerbatimArguments: verbatim,
         });
         child.on('error', reject);
         child.on('exit', (code, signal) => {
@@ -50,7 +65,8 @@ export function exec(
             );
           }
         });
-      }),
+      });
+    },
   };
   if (when !== undefined) task.when = when;
   return task;

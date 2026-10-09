@@ -47,7 +47,7 @@ const greet: FunctionTask = {
 - `planTasks(task, ctx)` - the tasks which would run, without running them, or `undefined` when nothing would run. Skipped function tasks and collections left empty are removed. Every `when` is evaluated up front, before any task runs, so a condition can't depend on what an earlier task does
 - `labelsOf(task)` - the labels of the function tasks, in the order they'd start
 
-Commands are run without a shell, so on Windows, commands which are `.cmd` shims, such as `npm`, can't be run yet.
+Commands are run without a shell, except on Windows, where `.cmd` and `.bat` files such as `npm` can only run through `cmd.exe`. There, commands are found through `PATH` and `PATHEXT`, and the arguments to `.cmd` and `.bat` files are escaped so they can't run other commands. Those arguments can't contain line breaks.
 
 ## Testing your tasks
 
