@@ -56,8 +56,8 @@ describe(diff, () => {
       ['modified.txt', file('before')],
       ['unchanged.txt', file('unchanged')],
     ]);
-    const after = writeText(
-      writeText(before.delete('deleted.txt'), 'modified.txt', 'after'),
+    const after = await writeText(
+      await writeText(before.delete('deleted.txt'), 'modified.txt', 'after'),
       'created.txt',
       'created',
     );
@@ -73,7 +73,7 @@ describe(diff, () => {
 
   test('does not report a file rewritten with identical bytes', async () => {
     const before = new Files([['a.txt', file('same')]]);
-    const after = writeText(before, 'a.txt', 'same');
+    const after = await writeText(before, 'a.txt', 'same');
     expect((await diff(before, after)).size).toBe(0);
   });
 
@@ -115,7 +115,7 @@ describe(diff, () => {
     const before = await fromDisk(dir);
     const changes = await diff(
       before,
-      writeText(before, 'a.sh', 'echo a', {mode: 0o755}),
+      await writeText(before, 'a.sh', 'echo a', {mode: 0o755}),
     );
     expect([...changes.keys()]).toEqual(
       process.platform === 'win32' ? [] : ['a.sh'],
@@ -126,7 +126,10 @@ describe(diff, () => {
     await fs.writeFile(path.join(dir, 'a.sh'), 'echo a');
     await fs.chmod(path.join(dir, 'a.sh'), 0o755);
     const before = await fromDisk(dir);
-    const changes = await diff(before, writeText(before, 'a.sh', 'echo a'));
+    const changes = await diff(
+      before,
+      await writeText(before, 'a.sh', 'echo a'),
+    );
     expect(changes.size).toBe(0);
   });
 

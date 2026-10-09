@@ -9,7 +9,7 @@ describe(readText, () => {
   });
 
   test('decodes UTF-8', async () => {
-    const files = writeText(new Files(), 'a.txt', 'Hello ☔️');
+    const files = await writeText(new Files(), 'a.txt', 'Hello ☔️');
     await expect(readText(files, 'a.txt')).resolves.toBe('Hello ☔️');
   });
 });

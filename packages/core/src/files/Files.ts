@@ -23,7 +23,7 @@ function normalize(file: string): string {
  * needed. Use `readText` and `writeText` to read and write text, or `get(path)?.bytes()` to read bytes.
  *
  * @example
- * let files = writeText(new Files(), 'greeting.txt', 'Hello!');
+ * let files = await writeText(new Files(), 'greeting.txt', 'Hello!');
  * const greeting = files.get('greeting.txt');
  * if (greeting) files = files.set('copy.txt', greeting);
  * files.has('copy.txt'); // true

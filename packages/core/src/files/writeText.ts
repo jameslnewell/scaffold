@@ -16,26 +16,21 @@ export interface WriteTextOptions {
  * which replaces another keeps its mode.
  *
  * @example
- * files = writeText(files, 'greeting.txt', 'Hello!');
- * files = writeText(files, 'bin/greet.sh', '#!/bin/sh\necho Hello!\n', {mode: 0o755});
+ * files = await writeText(files, 'greeting.txt', 'Hello!');
+ * files = await writeText(files, 'bin/greet.sh', '#!/bin/sh\necho Hello!\n', {mode: 0o755});
  */
-export function writeText(
+export async function writeText(
   files: Files,
   file: string,
   text: string,
   {mode}: WriteTextOptions = {},
-): Files {
-  const bytes = new TextEncoder().encode(text);
+): Promise<Files> {
   const previous = files.get(file);
-  if (mode !== undefined || previous === undefined) {
-    return files.set(file, createFile({bytes, mode: mode ?? DEFAULT_MODE}));
-  }
-  // the file being replaced may not have been stat-ed yet, so its mode is only looked up when it's needed
-  return files.set(file, {
-    bytes: () => Promise.resolve(bytes),
-    stat: async () => ({
-      size: bytes.byteLength,
-      mode: (await previous.stat()).mode,
+  return files.set(
+    file,
+    createFile({
+      bytes: new TextEncoder().encode(text),
+      mode: mode ?? (previous ? (await previous.stat()).mode : DEFAULT_MODE),
     }),
-  });
+  );
 }

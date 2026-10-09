@@ -59,8 +59,12 @@ describe(apply, () => {
     await write('modified.txt', 'before');
     await write('deleted/file.txt', 'deleted');
     const before = await fromDisk(dir);
-    const after = writeText(
-      writeText(before.delete('deleted/file.txt'), 'modified.txt', 'after'),
+    const after = await writeText(
+      await writeText(
+        before.delete('deleted/file.txt'),
+        'modified.txt',
+        'after',
+      ),
       'created/file.txt',
       'created',
     );
@@ -75,7 +79,7 @@ describe(apply, () => {
 
   test('writes a tree to an empty directory', async () => {
     const destination = path.join(dir, 'new');
-    const files = writeText(new Files(), 'a/b.txt', 'b');
+    const files = await writeText(new Files(), 'a/b.txt', 'b');
     await apply(destination, await diff(new Files(), files));
     await expect(
       fs.readFile(path.join(destination, 'a/b.txt'), 'utf8'),
@@ -105,8 +109,10 @@ describe(apply, () => {
       await write('kept.sh', 'echo kept');
       await fs.chmod(path.join(dir, 'kept.sh'), 0o755);
       const before = await fromDisk(dir);
-      let after = writeText(before, 'kept.sh', 'echo changed');
-      after = writeText(after, 'executable.sh', 'echo run', {mode: 0o700});
+      let after = await writeText(before, 'kept.sh', 'echo changed');
+      after = await writeText(after, 'executable.sh', 'echo run', {
+        mode: 0o700,
+      });
       after = after.set(
         'created.sh',
         withMode(new TextEncoder().encode('echo created'), 0o700),
@@ -222,7 +228,7 @@ describe(apply, () => {
     // then change one file
     const {files: before, reads} = spyOnReads(await fromDisk(destination));
     expect(before.size).toBe(10_001);
-    const after = writeText(before, '0/0.txt', 'changed');
+    const after = await writeText(before, '0/0.txt', 'changed');
     const changes = await diff(before, after);
     await apply(destination, changes);
 

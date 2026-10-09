@@ -24,7 +24,7 @@ npm install @buildscaffold/core
 import {fromDisk, readText, writeText} from '@buildscaffold/core/files';
 
 let files = await fromDisk('./my-project');
-files = writeText(files, 'greeting.txt', 'Hello!');
+files = await writeText(files, 'greeting.txt', 'Hello!');
 files.has('greeting.txt'); // true
 await readText(files, 'greeting.txt'); // 'Hello!'
 
@@ -38,7 +38,7 @@ if (greeting) files = files.set('copy.txt', greeting);
 - `files.set(path, file)` and `files.delete(path)` return a changed tree
 - `fromDisk(dir, {glob?, ignore?})` - load a tree from a directory, given as a path or a `URL`. Paths are listed straight away but files are only read when needed. Dotfiles are loaded (and `*` and `**` match them), `**/.git/**` and `**/node_modules/**` are ignored unless `ignore` replaces them, symbolic links are skipped, and a missing directory loads as an empty tree
 - `readText(files, path)` - read a file as UTF-8 text, or `undefined` when there is none
-- `writeText(files, path, text, {mode?})` - write a file as UTF-8 text. Without a `mode`, a new file gets the default mode, `0o644`, and a file which replaces another keeps its mode
+- `writeText(files, path, text, {mode?})` - resolves to a new tree with the file written as UTF-8 text. Without a `mode`, a new file gets the default mode, `0o644`, and a file which replaces another keeps its mode
 
 ### File
 
