@@ -8,7 +8,11 @@ import {template} from './files.js';
 describe(template, () => {
   test('renders .ejs files and removes the extension', async () => {
     const files = await template(
-      writeText(new Files(), 'package.json.ejs', '{"name": "<%= name %>"}'),
+      await writeText(
+        new Files(),
+        'package.json.ejs',
+        '{"name": "<%= name %>"}',
+      ),
       {name: 'Bob'},
     );
     expect([...files.keys()]).toEqual(['package.json']);
@@ -18,14 +22,18 @@ describe(template, () => {
   });
 
   test('leaves other files as they are', async () => {
-    const images = writeText(new Files(), 'logo.jpg', 'not really an image');
+    const images = await writeText(
+      new Files(),
+      'logo.jpg',
+      'not really an image',
+    );
     const files = await template(images, {});
     expect(files.get('logo.jpg')).toBe(images.get('logo.jpg'));
   });
 
   test('does not HTML escape values', async () => {
     const files = await template(
-      writeText(new Files(), 'a.json.ejs', '"<%= value %>"'),
+      await writeText(new Files(), 'a.json.ejs', '"<%= value %>"'),
       {value: `Bob's <tool> & co`},
     );
     await expect(readText(files, 'a.json')).resolves.toBe(
@@ -54,8 +62,8 @@ describe(template, () => {
   });
 
   test('throws when a template would replace another file', async () => {
-    const files = writeText(
-      writeText(new Files(), 'a.txt', ''),
+    const files = await writeText(
+      await writeText(new Files(), 'a.txt', ''),
       'a.txt.ejs',
       '',
     );
@@ -65,13 +73,16 @@ describe(template, () => {
   });
 
   test('leaves a file named .ejs as it is', async () => {
-    const files = await template(writeText(new Files(), 'dir/.ejs', ''), {});
+    const files = await template(
+      await writeText(new Files(), 'dir/.ejs', ''),
+      {},
+    );
     expect([...files.keys()]).toEqual(['dir/.ejs']);
   });
 
   test('reports which template failed to render', async () => {
     await expect(
-      template(writeText(new Files(), 'a.txt.ejs', '<%= missing %>'), {}),
+      template(await writeText(new Files(), 'a.txt.ejs', '<%= missing %>'), {}),
     ).rejects.toThrow('Template "a.txt.ejs" failed to render');
   });
 });

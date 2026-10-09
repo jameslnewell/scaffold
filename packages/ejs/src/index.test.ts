@@ -8,8 +8,12 @@ import {template} from './index.js';
 
 describe(template, () => {
   test('merges the rendered tree into the destination', async () => {
-    const templates = writeText(new Files(), 'README.md.ejs', '# <%= name %>');
-    const destination = writeText(new Files(), 'other.txt', '');
+    const templates = await writeText(
+      new Files(),
+      'README.md.ejs',
+      '# <%= name %>',
+    );
+    const destination = await writeText(new Files(), 'other.txt', '');
 
     const files = await template(
       Promise.resolve(templates),

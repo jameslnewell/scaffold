@@ -66,7 +66,7 @@ export async function template(
       throw new Error(`Template "${file}" failed to render`, {cause});
     }
     // written to a tree of its own and collected, so the result is built once rather than copied for each file
-    entries.push(...writeText(new Files(), output, text, {mode}));
+    entries.push(...(await writeText(new Files(), output, text, {mode})));
   }
   return new Files(entries);
 }
