@@ -6,7 +6,7 @@ import {planTasks} from './planTasks.js';
 
 const file: File = {
   bytes: () => Promise.resolve(new Uint8Array()),
-  stat: () => Promise.resolve({size: 0}),
+  stat: () => Promise.resolve({size: 0, mode: 0o644}),
 };
 const change = {type: 'modify', file} as const;
 

@@ -12,7 +12,7 @@ const ctx: TaskContext = {
         type: 'create',
         file: {
           bytes: () => Promise.resolve(new Uint8Array()),
-          stat: () => Promise.resolve({size: 0}),
+          stat: () => Promise.resolve({size: 0, mode: 0o644}),
         },
       },
     ],
