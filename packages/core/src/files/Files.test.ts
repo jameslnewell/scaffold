@@ -4,7 +4,7 @@ import {Files} from './Files.js';
 
 const file: File = {
   bytes: () => Promise.resolve(new TextEncoder().encode('content')),
-  stat: () => Promise.resolve({size: 7}),
+  stat: () => Promise.resolve({size: 7, mode: 0o644}),
 };
 
 describe(Files, () => {

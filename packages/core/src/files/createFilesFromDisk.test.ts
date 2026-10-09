@@ -1,11 +1,10 @@
 import * as fs from 'node:fs/promises';
 import * as os from 'node:os';
 import * as path from 'node:path';
-import {afterEach, beforeEach, describe, expect, test, vi} from 'vitest';
-import {DiskFile} from './DiskFile.js';
-import {fromDisk} from './fromDisk.js';
+import {afterEach, beforeEach, describe, expect, test} from 'vitest';
+import {createFilesFromDisk as fromDisk} from './createFilesFromDisk.js';
 import {pathToFileURL} from 'node:url';
-import {readText} from './contents.js';
+import {readText} from './readText.js';
 
 describe(fromDisk, () => {
   let dir: string;
@@ -76,13 +75,22 @@ describe(fromDisk, () => {
     expect(files.size).toBe(0);
   });
 
-  test('reads contents lazily and only once', async () => {
-    const read = vi.spyOn(DiskFile.prototype, 'bytes');
+  test('reads files when they are needed, and only once', async () => {
     const files = await fromDisk(dir);
-    expect(read).not.toHaveBeenCalled();
-    await expect(readText(files, 'README.md')).resolves.toBe('# Readme');
-    await readText(files, 'README.md');
-    expect(read).toHaveBeenCalledTimes(2);
-    expect(read.mock.results[0]?.value).toBe(read.mock.results[1]?.value);
+    // a file is read when it's needed, so a change made after loading is seen
+    await fs.writeFile(path.join(dir, 'README.md'), '# Changed');
+    await expect(readText(files, 'README.md')).resolves.toBe('# Changed');
+    // and the read is cached, so a later change isn't
+    await fs.writeFile(path.join(dir, 'README.md'), '# Changed again');
+    await expect(readText(files, 'README.md')).resolves.toBe('# Changed');
+  });
+
+  test('reports the size and mode of a file', async () => {
+    const files = await fromDisk(dir);
+    const stats = await fs.stat(path.join(dir, 'README.md'));
+    await expect(files.get('README.md')?.stat()).resolves.toEqual({
+      size: stats.size,
+      mode: stats.mode,
+    });
   });
 });

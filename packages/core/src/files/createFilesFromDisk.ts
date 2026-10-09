@@ -1,6 +1,6 @@
 import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
-import {DiskFile} from './DiskFile.js';
+import {type File, createFileFromDisk} from './File.js';
 import {Files} from './Files.js';
 import {fileURLToPath} from 'node:url';
 import {matchesGlob} from './matchesGlob.js';
@@ -27,7 +27,7 @@ export interface FromDiskOptions {
  *   ignore: ['**\/.git/**', '**\/node_modules/**', 'dist/**'],
  * });
  */
-export async function fromDisk(
+export async function createFilesFromDisk(
   dir: string | URL,
   {glob, ignore = DEFAULT_IGNORE}: FromDiskOptions = {},
 ): Promise<Files> {
@@ -35,7 +35,7 @@ export async function fromDisk(
   const isIgnored = (file: string): boolean =>
     ignore.some((pattern) => matchesGlob(file, pattern));
 
-  const entries: [string, DiskFile][] = [];
+  const entries: [string, File][] = [];
 
   // walks the tree by hand rather than using fs.glob() because fs.glob() can't match dotfiles, and so ignored
   // directories like node_modules can be skipped without listing their contents
@@ -60,7 +60,7 @@ export async function fromDisk(
         } else if (dirent.isFile()) {
           if (isIgnored(file)) return;
           if (glob !== undefined && !matchesGlob(file, glob)) return;
-          entries.push([file, new DiskFile(path.join(root, file))]);
+          entries.push([file, createFileFromDisk(path.join(root, file))]);
         }
       }),
     );

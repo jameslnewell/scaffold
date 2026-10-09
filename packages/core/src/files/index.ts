@@ -1,4 +1,8 @@
 export type {File, FileStats} from './File.js';
 export {Files} from './Files.js';
-export {type FromDiskOptions, fromDisk} from './fromDisk.js';
-export {type WriteTextOptions, readText, writeText} from './contents.js';
+export {
+  type FromDiskOptions,
+  createFilesFromDisk as fromDisk,
+} from './createFilesFromDisk.js';
+export {readText} from './readText.js';
+export {type WriteTextOptions, writeText} from './writeText.js';

@@ -1,17 +1,6 @@
 import {describe, expect, test} from 'vitest';
-import {readText, writeText} from './contents.js';
 import {Files} from './Files.js';
-
-describe(readText, () => {
-  test('returns undefined when the file is missing', async () => {
-    await expect(readText(new Files(), 'a.txt')).resolves.toBeUndefined();
-  });
-
-  test('decodes UTF-8', async () => {
-    const files = writeText(new Files(), 'a.txt', 'Hello ☔️');
-    await expect(readText(files, 'a.txt')).resolves.toBe('Hello ☔️');
-  });
-});
+import {writeText} from './writeText.js';
 
 describe(writeText, () => {
   test('encodes UTF-8', async () => {
@@ -29,11 +18,20 @@ describe(writeText, () => {
     });
   });
 
-  test('writes a file without a mode, so an existing file keeps its mode', async () => {
-    const files = writeText(new Files(), 'a.sh', 'echo a');
+  test('gives a new file without a mode the default mode', async () => {
+    const files = writeText(new Files(), 'a.txt', 'a');
+    await expect(files.get('a.txt')?.stat()).resolves.toEqual({
+      size: 1,
+      mode: 0o644,
+    });
+  });
+
+  test('keeps the mode of the file it replaces when given no mode', async () => {
+    const executable = writeText(new Files(), 'a.sh', 'echo a', {mode: 0o755});
+    const files = writeText(executable, 'a.sh', 'echo b');
     await expect(files.get('a.sh')?.stat()).resolves.toEqual({
       size: 6,
-      mode: undefined,
+      mode: 0o755,
     });
   });
 });

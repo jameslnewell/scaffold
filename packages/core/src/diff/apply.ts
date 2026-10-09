@@ -1,17 +1,15 @@
 import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
 import type {Diff} from './diff.js';
-import {DiskFile} from '../files/DiskFile.js';
 import type {File} from '../files/File.js';
 import {concurrently} from '../files/concurrently.js';
-import {modeOf} from '../files/modeOf.js';
 
 /**
  * Write the changes to a directory, creating it if it doesn't exist: create and modify files, and delete files
  * (along with any directories left empty by deleting them).
  *
- * Files which were loaded from disk are copied natively rather than read into memory. A file with a mode gets
- * that mode, and a file without one gets the default mode when it's created and keeps its mode when it's modified.
+ * Each file is written with its bytes and mode. Only the files in the diff are read, so unchanged files are never
+ * read. They're read before anything is written, so files copied or moved within the directory are safe.
  *
  * To write a whole tree to an empty directory, diff it against an empty tree.
  *
@@ -32,24 +30,16 @@ export async function apply(dir: string, diff: Diff): Promise<void> {
     }
   }
 
-  // a file copied or moved within the directory may be overwritten or deleted before it has been copied, e.g.
-  // when swapping two files, so those sources are read into memory before anything is written. Real paths are
-  // compared, so the directory can be given with a different spelling or through a symlink.
-  const preloaded = new Set<File>();
-  const realRoot = await realpathIfExists(root);
-  if (realRoot !== undefined) {
-    await concurrently({
-      items: writes,
-      task: async ([, value]) => {
-        if (!(value instanceof DiskFile)) return;
-        const relative = path.relative(realRoot, await fs.realpath(value.path));
-        if (!diff.has(relative.split(path.sep).join('/'))) return;
-        // the read and the stat are cached on the file, so they're kept until it's written
-        await Promise.all([value.bytes(), value.stat()]);
-        preloaded.add(value);
-      },
-    });
-  }
+  // the files are read before anything is deleted or written, since a file copied or moved within the directory
+  // may be read from a path which is about to change, e.g. when swapping two files
+  const contents = new Map<string, {bytes: Uint8Array; mode: number}>();
+  await concurrently({
+    items: writes,
+    task: async ([file, value]) => {
+      const [bytes, {mode}] = await Promise.all([value.bytes(), value.stat()]);
+      contents.set(file, {bytes, mode});
+    },
+  });
 
   // deletes go first so a deleted file can be replaced by a directory of the same name
   await concurrently({
@@ -71,26 +61,12 @@ export async function apply(dir: string, diff: Diff): Promise<void> {
   });
 
   await concurrently({
-    items: writes,
-    task: async ([file, value]) => {
+    items: contents,
+    task: async ([file, {bytes, mode}]) => {
       const destination = path.join(root, file);
-      if (value instanceof DiskFile && !preloaded.has(value)) {
-        // copies natively (or clones where the filesystem supports it) so the bytes never pass through JS, along
-        // with the source's mode
-        await fs.copyFile(
-          value.path,
-          destination,
-          fs.constants.COPYFILE_FICLONE,
-        );
-        return;
-      }
-      // writeFile() keeps the mode of an existing file, so a file without a mode keeps its mode
-      await fs.writeFile(destination, await value.bytes());
+      await fs.writeFile(destination, bytes);
       // Windows only has a read-only flag, so modes aren't applied there
-      if (process.platform !== 'win32') {
-        const mode = await modeOf(value);
-        if (mode !== undefined) await fs.chmod(destination, mode);
-      }
+      if (process.platform !== 'win32') await fs.chmod(destination, mode);
     },
   });
 }
@@ -133,16 +109,5 @@ async function removeEmptyDirectories({
       }
       throw error;
     }
-  }
-}
-
-async function realpathIfExists(file: string): Promise<string | undefined> {
-  try {
-    return await fs.realpath(file);
-  } catch (error) {
-    if (error instanceof Error && 'code' in error && error.code === 'ENOENT') {
-      return undefined;
-    }
-    throw error;
   }
 }
