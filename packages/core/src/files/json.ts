@@ -1,5 +1,6 @@
-import {readText, writeText} from './contents.js';
 import type {Files} from './Files.js';
+import {readText} from './readText.js';
+import {writeText} from './writeText.js';
 
 /**
  * Parse a JSON file, or `undefined` when there is no file.

@@ -4,9 +4,10 @@ import * as path from 'node:path';
 import {afterEach, beforeEach, describe, expect, test} from 'vitest';
 import {apply, diff} from '../diff/index.js';
 import {copy, move, remove} from './operations.js';
-import {readText, writeText} from './contents.js';
 import {Files} from './Files.js';
-import {fromDisk} from './fromDisk.js';
+import {createFilesFromDisk as fromDisk} from './createFilesFromDisk.js';
+import {readText} from './readText.js';
+import {writeText} from './writeText.js';
 
 function tree(paths: string[]): Files {
   return paths.reduce(

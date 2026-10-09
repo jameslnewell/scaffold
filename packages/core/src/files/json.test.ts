@@ -1,7 +1,8 @@
 import * as json from './json.js';
 import {describe, expect, test} from 'vitest';
-import {readText, writeText} from './contents.js';
 import {Files} from './Files.js';
+import {readText} from './readText.js';
+import {writeText} from './writeText.js';
 
 describe('json', () => {
   test('read returns undefined when there is no file', async () => {
