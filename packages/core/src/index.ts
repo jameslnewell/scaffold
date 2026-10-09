@@ -1,9 +1,6 @@
-import type {Files} from './files/index.js';
-
-/**
- * A scaffold receives the destination tree and returns the tree it should become.
- *
- * @example
- * const greet: Scaffold = (files) => writeText(files, 'greeting.txt', 'Hello!');
- */
-export type Scaffold = (files: Files) => Files | Promise<Files>;
+export type {Scaffold} from './scaffolds/Scaffold.js';
+export {pipe} from './scaffolds/pipe.js';
+export {type MergeOptions, merge} from './scaffolds/merge.js';
+export {when} from './scaffolds/when.js';
+export {copy, move, remove, write} from './scaffolds/operations.js';
+export * as json from './scaffolds/json.js';
