@@ -28,3 +28,16 @@ jobs:
       - run: pnpm run check:typing
       - run: pnpm run test
       - run: pnpm run build
+
+  # exec resolves and runs commands differently on Windows, so the task package's tests also run there
+  task-windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter @buildscaffold/task run test
