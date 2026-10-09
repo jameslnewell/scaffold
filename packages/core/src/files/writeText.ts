@@ -25,16 +25,17 @@ export function writeText(
   text: string,
   {mode}: WriteTextOptions = {},
 ): Files {
+  const bytes = new TextEncoder().encode(text);
   const previous = files.get(file);
-  return files.set(
-    file,
-    createFile({
-      bytes: new TextEncoder().encode(text),
-      mode:
-        mode ??
-        (previous === undefined
-          ? DEFAULT_MODE
-          : async () => (await previous.stat()).mode),
+  if (mode !== undefined || previous === undefined) {
+    return files.set(file, createFile({bytes, mode: mode ?? DEFAULT_MODE}));
+  }
+  // the file being replaced may not have been stat-ed yet, so its mode is only looked up when it's needed
+  return files.set(file, {
+    bytes: () => Promise.resolve(bytes),
+    stat: async () => ({
+      size: bytes.byteLength,
+      mode: (await previous.stat()).mode,
     }),
-  );
+  });
 }
