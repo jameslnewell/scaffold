@@ -18,7 +18,7 @@ describe(pipe, () => {
       log('first'),
       write('a.txt', 'a'),
       log('second'),
-      (files) => writeText(files.delete('a.txt'), 'b.txt', ''),
+      async (files) => writeText(files.delete('a.txt'), 'b.txt', ''),
     )(new Files());
     expect(order).toEqual(['first', 'second']);
     expect([...files.keys()]).toEqual(['b.txt']);

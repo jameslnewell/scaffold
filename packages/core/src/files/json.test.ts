@@ -10,19 +10,19 @@ describe('json', () => {
   });
 
   test('read throws when the file is not valid JSON', async () => {
-    const files = writeText(new Files(), 'a.json', '{');
+    const files = await writeText(new Files(), 'a.json', '{');
     await expect(json.read(files, 'a.json')).rejects.toThrow(
       'File "a.json" is not valid JSON',
     );
   });
 
   test('write indents with two spaces and ends with a newline', async () => {
-    const files = json.write(new Files(), 'a.json', {a: 1});
+    const files = await json.write(new Files(), 'a.json', {a: 1});
     await expect(readText(files, 'a.json')).resolves.toBe('{\n  "a": 1\n}\n');
   });
 
-  test('write throws when the value cannot be written as JSON', () => {
-    expect(() => json.write(new Files(), 'a.json', undefined)).toThrow(
+  test('write throws when the value cannot be written as JSON', async () => {
+    await expect(json.write(new Files(), 'a.json', undefined)).rejects.toThrow(
       `File "a.json" can't be written as JSON`,
     );
   });
@@ -37,7 +37,7 @@ describe('json', () => {
 
   test('transform receives the parsed file', async () => {
     const files = await json.transform(
-      json.write(new Files(), 'a.json', {count: 1}),
+      await json.write(new Files(), 'a.json', {count: 1}),
       'a.json',
       (value) => ({count: (value as {count: number}).count + 1}),
     );
@@ -51,7 +51,7 @@ describe('json', () => {
 
   test('merge deeply merges objects and replaces everything else', async () => {
     const files = await json.merge(
-      json.write(new Files(), 'package.json', {
+      await json.write(new Files(), 'package.json', {
         name: 'before',
         keywords: ['a'],
         scripts: {build: 'tsc', test: 'jest'},
@@ -68,7 +68,11 @@ describe('json', () => {
 
   test('merge keeps a __proto__ key as data', async () => {
     const files = await json.merge(
-      writeText(new Files(), 'a.json', '{"__proto__": {"polluted": true}}'),
+      await writeText(
+        new Files(),
+        'a.json',
+        '{"__proto__": {"polluted": true}}',
+      ),
       'a.json',
       JSON.parse('{"__proto__": {"other": true}}'),
     );

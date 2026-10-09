@@ -15,7 +15,7 @@ describe(when, () => {
   });
 
   test('returns the tree unchanged when the condition is false', async () => {
-    const files = writeText(new Files(), 'README.md', '');
+    const files = await writeText(new Files(), 'README.md', '');
     await expect(scaffold(files)).resolves.toBe(files);
   });
 });

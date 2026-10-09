@@ -91,7 +91,7 @@ Each operation matches a file, the files in a directory (`.` for the whole tree)
 ### JSON operations
 
 - `json.read(files, path)` - parse a JSON file, or `undefined` when there is none
-- `json.write(files, path, value)` - write a value as JSON, indented with two spaces and ending with a newline. An existing file is replaced
+- `json.write(files, path, value)` - resolves to a new tree with a value written as JSON, indented with two spaces and ending with a newline. An existing file is replaced
 - `json.transform(files, path, fn)` - replace a JSON file with the result of `fn` (which may be async), which receives `undefined` when there is no file
 - `json.merge(files, path, value)` - deeply merge a value into a JSON file, creating it when there is none. Objects are merged key by key, and anything else, including arrays, replaces what is in the file
 

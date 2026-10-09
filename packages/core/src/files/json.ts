@@ -22,9 +22,13 @@ export async function read(files: Files, file: string): Promise<unknown> {
  * A new tree with the file replaced by the value as JSON, indented with two spaces.
  *
  * @example
- * files = json.write(files, 'package.json', {name: 'my-package'});
+ * files = await json.write(files, 'package.json', {name: 'my-package'});
  */
-export function write(files: Files, file: string, value: unknown): Files {
+export async function write(
+  files: Files,
+  file: string,
+  value: unknown,
+): Promise<Files> {
   // JSON.stringify() returns undefined rather than throwing for values like undefined and functions
   const text = JSON.stringify(value, null, 2) as string | undefined;
   if (text === undefined) {

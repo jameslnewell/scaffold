@@ -6,13 +6,13 @@ import {describe, expect, test} from 'vitest';
 import {merge} from './merge.js';
 import {pathToFileURL} from 'node:url';
 
-describe(merge, () => {
-  const destination = writeText(
-    writeText(new Files(), 'a.txt', 'destination'),
+describe(merge, async () => {
+  const destination = await writeText(
+    await writeText(new Files(), 'a.txt', 'destination'),
     'b.txt',
     'destination',
   );
-  const overlay = writeText(new Files(), 'a.txt', 'overlay');
+  const overlay = await writeText(new Files(), 'a.txt', 'overlay');
 
   test('overlays the tree, replacing files with the same path', async () => {
     const files = await merge(overlay)(destination);
