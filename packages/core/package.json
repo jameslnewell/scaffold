@@ -1,0 +1,47 @@
+{
+  "name": "@buildscaffold/core",
+  "version": "0.0.0",
+  "description": "Build file trees with composable scaffolds, then diff and apply them to disk",
+  "type": "module",
+  "exports": {
+    ".": {
+      "@buildscaffold/source": "./src/index.ts",
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./files": {
+      "@buildscaffold/source": "./src/files/index.ts",
+      "types": "./dist/files/index.d.ts",
+      "default": "./dist/files/index.js"
+    },
+    "./diff": {
+      "@buildscaffold/source": "./src/diff/index.ts",
+      "types": "./dist/diff/index.d.ts",
+      "default": "./dist/diff/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "devDependencies": {
+    "@jameslnewell/eslint-config": "^8.0.0",
+    "@jameslnewell/vitest-config": "^8.0.0",
+    "@types/node": "^24.19.1",
+    "@typescript/native": "npm:typescript@^7.0.2",
+    "eslint": "^9.39.5",
+    "typescript": "npm:@typescript/typescript6@^6.0.2",
+    "vite": "^8.3.3",
+    "vitest": "^5.0.3"
+  },
+  "scripts": {
+    "build": "rm -rf ./dist && tsc -p tsconfig.build.json",
+    "check:linting": "eslint .",
+    "check:typing": "tsc",
+    "fix:linting": "eslint --fix .",
+    "test": "vitest run --project unit"
+  },
+  "engines": {
+    "node": ">=24"
+  },
+  "license": "MIT"
+}
