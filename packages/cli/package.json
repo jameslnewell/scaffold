@@ -1,0 +1,52 @@
+{
+  "name": "@buildscaffold/cli",
+  "version": "0.0.0",
+  "description": "The scaffold command, for running scaffolds built with @buildscaffold/core",
+  "type": "module",
+  "bin": {
+    "scaffold": "dist/cli.js"
+  },
+  "exports": {
+    "./define": {
+      "@buildscaffold/source": "./src/define.ts",
+      "types": "./dist/define.d.ts",
+      "default": "./dist/define.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "dependencies": {
+    "@inquirer/prompts": "^5.0.5",
+    "import-meta-resolve": "^4.2.0",
+    "yargs": "^17.7.3"
+  },
+  "peerDependencies": {
+    "@buildscaffold/core": "workspace:^",
+    "@buildscaffold/task": "workspace:^"
+  },
+  "devDependencies": {
+    "@buildscaffold/core": "workspace:*",
+    "@buildscaffold/task": "workspace:*",
+    "@jameslnewell/eslint-config": "^8.0.0",
+    "@jameslnewell/vitest-config": "^8.0.0",
+    "@types/node": "^24.19.1",
+    "@types/yargs": "^17.0.35",
+    "@typescript/native": "npm:typescript@^7.0.2",
+    "eslint": "^9.39.5",
+    "typescript": "npm:@typescript/typescript6@^6.0.2",
+    "vite": "^8.3.3",
+    "vitest": "^5.0.3"
+  },
+  "scripts": {
+    "build": "rm -rf ./dist && tsc -p tsconfig.build.json && chmod +x ./dist/cli.js",
+    "check:linting": "eslint .",
+    "check:typing": "tsc",
+    "fix:linting": "eslint --fix .",
+    "test": "vitest run --project unit"
+  },
+  "engines": {
+    "node": ">=24"
+  },
+  "license": "MIT"
+}
