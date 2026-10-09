@@ -22,7 +22,7 @@ const definition = {
     const bytes = new TextEncoder().encode('Hello ' + name + '!');
     return files.set('greeting.txt', {
       bytes: () => Promise.resolve(bytes),
-      stat: () => Promise.resolve({size: bytes.byteLength}),
+      stat: () => Promise.resolve({size: bytes.byteLength, mode: 0o644}),
     });
   },
   tasks: ({options}) => {
