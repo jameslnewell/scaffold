@@ -19,7 +19,11 @@ const definition = {
   },
   scaffold: ({name, fail}) => (files) => {
     if (fail === 'scaffold') throw new Error('scaffold failed');
-    return files.write('greeting.txt', new TextEncoder().encode('Hello ' + name + '!'));
+    const bytes = new TextEncoder().encode('Hello ' + name + '!');
+    return files.set('greeting.txt', {
+      bytes: () => Promise.resolve(bytes),
+      stat: () => Promise.resolve({size: bytes.byteLength}),
+    });
   },
   tasks: ({options}) => {
     if (options.fail === 'factory') throw new Error('factory failed');
