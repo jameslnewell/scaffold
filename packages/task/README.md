@@ -70,7 +70,7 @@ expect(tasks).toMatchObject({
 
 // package.json didn't change, so npm install would skip itself
 const before = new Files();
-const after = writeText(before, 'greeting.txt', 'Hello!');
+const after = await writeText(before, 'greeting.txt', 'Hello!');
 const plan = await planTasks(tasks, {
   directory: '/tmp/empty',
   diff: await diff(before, after),
